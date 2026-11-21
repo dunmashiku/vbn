@@ -219,6 +219,7 @@ Pick the questions that fit the room:
 3. Which organizations should we talk to next: county offices, VSOs, transition offices, churches, nonprofits?
 4. Who can review our deadline and document rules for accuracy?
 5. Do your officers prefer video in the Navigator, or their own tools (phone, Zoom, in person)?
+6. Do the short document names on the timeline make sense to you: "DD-214", "Service treatment records", "Birth or adoption certificates", "Social Security numbers", "Direct deposit details"? What would you call them? (Ask Edwin directly; the names live in `packages/shared/documents.ts` as `shortName`.)
 
 ---
 

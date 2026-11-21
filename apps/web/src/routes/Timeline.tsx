@@ -125,47 +125,49 @@ export function TimelinePage() {
           const isOpen = open.has(t.rule.id);
           const bodyId = `body-${t.rule.id}`;
           return (
-            <li key={t.rule.id} id={`m-${t.rule.id}`} className="relative scroll-mt-28 pb-8 pl-10 sm:pl-12">
-              <span aria-hidden="true" className={`absolute left-0 top-6 grid h-6 w-6 place-items-center rounded-full border-[3px] ring-4 ring-paper sm:h-7 sm:w-7 ${DOT[t.status]}`}>
+            <li key={t.rule.id} id={`m-${t.rule.id}`} className="relative scroll-mt-28 pb-5 pl-10 sm:pl-12">
+              <span aria-hidden="true" className={`absolute left-0 top-5 grid h-6 w-6 place-items-center rounded-full border-[3px] ring-4 ring-paper sm:h-7 sm:w-7 ${DOT[t.status]}`}>
                 {t.status === "done" && <IconCheck size={14} strokeWidth={3} className="text-white" />}
               </span>
-              <article className={`card p-5 sm:p-6 ${t.status === "done" ? "opacity-80" : ""}`} aria-labelledby={`h-${t.rule.id}`}>
+              <article className={`card p-4 sm:p-5 ${t.status === "done" ? "opacity-80" : ""}`} aria-labelledby={`h-${t.rule.id}`}>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <p className="font-semibold text-navy-800">{formatWindow(t.opens, t.due)}</p>
                   <span className={`chip chip-${t.status}`}>
                     <span className="sr-only">Status: </span>{STATUS_LABEL[t.status]}
                   </span>
                 </div>
-                <h3 id={`h-${t.rule.id}`} className="mt-2 text-2xl text-navy-900">
+                <h3 id={`h-${t.rule.id}`} className="mt-1.5 text-xl text-navy-900">
                   <button
                     type="button"
                     aria-expanded={isOpen}
                     aria-controls={bodyId}
                     onClick={() => setCard(t.rule.id, !isOpen)}
-                    className="-mx-2 flex w-[calc(100%+1rem)] items-start justify-between gap-3 rounded-md px-2 py-1 text-left hover:bg-paper"
+                    className="-mx-2 flex w-[calc(100%+1rem)] items-start justify-between gap-3 rounded-md px-2 py-0.5 text-left hover:bg-paper/70"
                   >
                     <span>{title}</span>
-                    <span aria-hidden="true" className="mt-1 flex shrink-0 items-center gap-1 font-sans text-base font-semibold text-navy-800">
+                    <span aria-hidden="true" className="mt-0.5 flex shrink-0 items-center gap-1 font-sans text-base font-semibold text-navy-800">
                       <span className="hidden sm:inline">{isOpen ? "Hide" : "Show"}</span>
                       <IconChevronDown size={22} className={`transition-transform motion-reduce:transition-none ${isOpen ? "rotate-180" : ""}`} />
                     </span>
                   </button>
                 </h3>
-                <p className="mt-1 text-base text-muted">{t.windowLabel}</p>
+                <p className="mt-0.5 text-base text-muted">{t.windowLabel}</p>
 
                 <div id={bodyId} hidden={!isOpen}>
-                <p className="prose-measure mt-3">{t.rule.explanation}</p>
+                <p className="prose-measure mt-2">{t.rule.explanation}</p>
 
                 {t.documents.length > 0 && (
-                  <div className="mt-4 rounded-lg bg-paper p-4">
+                  <div className="mt-3 rounded-lg bg-paper px-4 py-3">
                     <h4 className="font-sans text-base font-bold">Documents for this step</h4>
-                    <ul className="mt-2 space-y-1.5 text-base">
+                    <ul className="mt-1.5 space-y-1 text-base">
                       {t.documents.map((d) => {
                         const st = data.docStatus(d.id);
                         return (
-                          <li key={d.id} className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <IconFile size={18} className="shrink-0 text-muted" />
-                            <Link to="/documents" hash={`d-${d.id}`} className="link">{d.name}</Link>
+                          <li key={d.id} className="flex items-start justify-between gap-3">
+                            <span className="flex min-w-0 items-start gap-2">
+                              <IconFile size={18} className="mt-1 shrink-0 text-muted" />
+                              <Link to="/documents" hash={`d-${d.id}`} className="link">{d.shortName}</Link>
+                            </span>
                             {d.handling === "have-ready" ? (
                               <span className={`chip ${st === "ready" ? "chip-ready" : "chip-not-started"}`}>{st === "ready" ? "Ready" : "Have ready"}</span>
                             ) : (
@@ -178,7 +180,7 @@ export function TimelinePage() {
                   </div>
                 )}
 
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                   <label htmlFor={checkboxId} className="flex min-h-11 cursor-pointer items-center gap-3 font-semibold">
                     <input
                       id={checkboxId}
