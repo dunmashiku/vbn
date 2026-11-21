@@ -11,6 +11,8 @@ const KEYS = {
   documents: "bn.documents.v1",
   /** Plans the veteran shared with a representative (demo stand-in for a server-side share). */
   shares: "bn.shares.v1",
+  /** Form prep answers by form id. Browser only; never sent to chat or shared. */
+  formPrep: "bn.formprep.v1",
 } as const;
 
 const CHANGE_EVENT = "bn-storage";
@@ -48,6 +50,14 @@ export const saveDocStatuses = (v: DocumentStatuses) => write(KEYS.documents, v)
 
 export const loadSharesRaw = (): unknown[] => read<unknown[]>(KEYS.shares) ?? [];
 export const saveSharesRaw = (v: unknown[]) => write(KEYS.shares, v);
+
+export type AllPrepAnswers = Record<string, Record<string, string>>;
+export const loadAllPrepAnswers = (): AllPrepAnswers => read<AllPrepAnswers>(KEYS.formPrep) ?? {};
+export const loadPrepAnswers = (formId: string): Record<string, string> => loadAllPrepAnswers()[formId] ?? {};
+export function savePrepAnswer(formId: string, key: string, value: string) {
+  const all = loadAllPrepAnswers();
+  write(KEYS.formPrep, { ...all, [formId]: { ...(all[formId] ?? {}), [key]: value } });
+}
 
 export function clearLocalData() {
   for (const k of Object.values(KEYS)) {
@@ -92,5 +102,6 @@ export function useStoredState() {
     milestones: loadMilestones(),
     docStatuses: loadDocStatuses(),
     sharesRaw: loadSharesRaw(),
+    prepAnswers: loadAllPrepAnswers(),
   };
 }

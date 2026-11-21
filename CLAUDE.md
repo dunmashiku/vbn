@@ -21,7 +21,8 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 - Uploaded files never leave the browser. Only built-in SAMPLE document text may be sent to chat ("Explain this document").
 - SSNs and bank details are `have-ready` reminders only: never uploaded, typed or stored. The chat input blocks SSN- and account-number-shaped text.
 - The chat server never logs message contents; validate every request with the shared Zod schemas and keep the length/history caps.
-- The app never files, prepares or submits anything to the VA. Point to free VA-accredited representatives.
+- The app never files, fills in or submits anything to the VA. Point to free VA-accredited representatives.
+- Form prep guides (`/forms/$formId`, e.g. `/forms/21-526ez`; forms, questions and item positions in `packages/shared/formPrep.ts`, registered in `PREP_FORMS`; page images in `apps/web/public/forms/<id>/`, rendered from the official PDF with the VA seal covered). The preview highlights where a question goes on the real page and never draws answers on it. Answers save on every change. For the 21-526EZ guide: the veteran answers the form's questions in their own words; answers stay in `localStorage` (cleared by "Clear my data"), never go to chat or shares (chat gets only a count), and SSN/DOB/VA file number/bank stay have-ready reminders. It prints a prep sheet to copy into VA.gov or review with an accredited representative. The chat may explain a question but never writes answers or decides what to claim. Needs attorney/VSO review before production (38 U.S.C. 5901).
 - The Veterans Crisis Line (988 then press 1, text 838255, VeteransCrisisLine.net) stays visible in the footer and in the system prompt.
 
 ## Representative help (`/help`, `/plan/$code`, `/session/$code`, `/rep`, `/rep/session/$code`)

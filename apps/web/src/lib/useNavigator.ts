@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  applicableDocuments, buildTimeline, todayISO,
+  answeredCount, applicableDocuments, buildTimeline, prepQuestionCount, todayISO,
   type ChatContext, type DocumentId, type DocumentRule, type DocumentStatus, type Intake, type TimelineItem,
 } from "@vbn/shared";
 import { useMemo } from "react";
@@ -21,11 +21,13 @@ export interface NavigatorData {
   files: Partial<Record<DocumentId, StoredFile>>;
   docStatus: (id: DocumentId) => DocumentStatus;
   readyCount: number;
+  prepAnswered: number;
 }
 
 /** Everything derived from the stored intake. Returns null when there is no intake yet. */
 export function useNavigatorData(): NavigatorData | null {
-  const { intake, milestones, docStatuses } = useStoredState();
+  const { intake, milestones, docStatuses, prepAnswers } = useStoredState();
+  const prepAnswered = answeredCount(prepAnswers["21-526ez"] ?? {});
   const filesQuery = useFiles();
   const intakeKey = JSON.stringify(intake);
   const milestonesKey = JSON.stringify(milestones);
@@ -46,9 +48,10 @@ export function useNavigatorData(): NavigatorData | null {
       files,
       docStatus,
       readyCount: documents.filter((d) => docStatus(d.id) === "ready").length,
+      prepAnswered,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intakeKey, milestonesKey, statusesKey, filesQuery.data]);
+  }, [intakeKey, milestonesKey, statusesKey, prepAnswered, filesQuery.data]);
 }
 
 /** The summary sent with each chat request. Never includes file contents or file names. */
@@ -58,6 +61,7 @@ export function toChatContext(d: NavigatorData): ChatContext {
     today: d.today,
     timeline: d.timeline.map((t) => ({ id: t.rule.id, title: t.rule.title, opens: t.opens, due: t.due, status: t.status })),
     documents: d.documents.map((doc) => ({ id: doc.id, name: doc.name, handling: doc.handling, status: d.docStatus(doc.id) })),
+    formPrep: d.prepAnswered ? { answered: d.prepAnswered, total: prepQuestionCount() } : undefined,
   };
 }
 

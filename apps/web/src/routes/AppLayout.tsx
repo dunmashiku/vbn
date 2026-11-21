@@ -69,6 +69,15 @@ const tabClass =
 export function AppLayout() {
   return (
     <ChatProvider>
+      <AppShell />
+    </ChatProvider>
+  );
+}
+
+function AppShell() {
+  const { collapsed } = useChat();
+  return (
+    <>
       <SkipLink />
       <PrototypeBanner />
       <header className="sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
@@ -78,13 +87,14 @@ export function AppLayout() {
             <ul className="flex flex-wrap gap-1">
               <li><Link to="/timeline" className={tabClass}>My timeline</Link></li>
               <li><Link to="/documents" className={tabClass}>My documents</Link></li>
+              <li><Link to="/forms" activeOptions={{ exact: false }} className={tabClass}>Forms</Link></li>
               <li><Link to="/help" className={tabClass}>Get help</Link></li>
             </ul>
           </nav>
           <ClearDataButton />
         </div>
       </header>
-      <div className="container-page grid gap-8 py-8 xl:grid-cols-[minmax(0,1fr)_27rem]">
+      <div className={`container-page grid gap-8 py-8 ${collapsed ? "xl:grid-cols-[minmax(0,1fr)_3rem]" : "xl:grid-cols-[minmax(0,1fr)_27rem]"}`}>
         <main id="main" tabIndex={-1} className="min-w-0 outline-none pb-20 xl:pb-0">
           <Outlet />
         </main>
@@ -99,6 +109,6 @@ export function AppLayout() {
           </p>
         </div>
       </footer>
-    </ChatProvider>
+    </>
   );
 }

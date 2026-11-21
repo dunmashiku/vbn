@@ -42,6 +42,8 @@ export const ChatContextSchema = z.object({
       }),
     )
     .max(20),
+  /** Progress on the 21-526EZ prep guide: counts only, never the answers. */
+  formPrep: z.object({ answered: z.number().int().min(0).max(100), total: z.number().int().min(0).max(100) }).optional(),
 });
 export type ChatContext = z.infer<typeof ChatContextSchema>;
 

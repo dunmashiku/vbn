@@ -88,6 +88,10 @@ Two tabs only connect in the same browser profile (they talk over a `BroadcastCh
 
 **Build my timeline** never needs an account. Afterwards, one line in the timeline summary offers to save it to a free account. **Sign in** in the header opens the veteran sign-in (**Continue with ID.me**, **Continue with email**, or continue without an account). Service officers use **For service officers** in the header (or in the Menu on smaller screens) or the button in "For organizations": work email, an accreditation check, then the console. **Fill in the demo officer** fills the form. Nothing is checked or stored, and no account is created.
 
+### Form prep (demo)
+
+Open **Forms**. Guides cover VA Forms 21-526EZ (disability claim), 21-0966 (intent to file), 10-10EZ (health care) and 21-0781 (mental health statement); add one in `packages/shared/forms/`. Open a form. On wide screens the official form page sits beside the questions and highlights where the current question goes; answers save as you type, and **Hide chat** folds the chat into a side tab. Each step follows a section of VA Form 21-526EZ (January 2026) in plain words. Answer one question, for example type a sample condition such as "Hearing loss · noise from heavy equipment · July 2019", and click **Ask the Navigator about this** to have the chat explain the question. The chat gets only the question, never your answer. Typing something shaped like an SSN or account number is blocked. **Print my prep sheet** prints only your answers, to copy into VA.gov or go over with an accredited representative. Nothing is filled in or submitted, and "Clear my data" erases the answers.
+
 ## What's where
 
 ```
