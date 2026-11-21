@@ -179,6 +179,9 @@ Both tabs must be in the **same Chrome window** at `localhost:5173`. In this dem
 **Optional, the "only who they chose" moment:** in tab 2, switch the organization at the top to **Lakeside Veterans Help Center (demo)** and type the same code. It says the plan was shared with Sample County, not Lakeside.
 > "The veteran decides which office sees their plan."
 
+**Optional, phone for people who can't come in:** in tab 1, share again with Sample County, **Phone** and **Now**. Read out the new code. In tab 2, open it by code: the case says **Phone call: keep this plan open while you talk.** In tab 1, click **Show my plan**. The page reads "Phone call" and shows the same plan the officer sees.
+> "Plenty of people will just call. They both look at the same plan while they talk, without a video app or a link to click."
+
 **Optional, video for remote help:** share again with **Video** and **Now**. Click **Join video session** in both tabs. They connect with live video; both mics start muted to avoid echo. In tab 1, untick **Show my plan during this session** and tab 2 shows "Hidden by the veteran." Click **End session**.
 
 If asked about HIPAA, see the questions section below.
