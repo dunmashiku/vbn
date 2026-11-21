@@ -14,7 +14,7 @@ Requirements: Node 22 or newer and pnpm 10.
 make setup
 ```
 
-Add your key to `services/chat/.env` (`ANTHROPIC_API_KEY=...`), then:
+Add your keys: `ANTHROPIC_API_KEY` in `services/chat/.env`, and your VA Lighthouse **sandbox** key as `VA_API_KEY` in `services/va-mcp/.env` (see [services/va-mcp/README.md](services/va-mcp/README.md)). Then:
 
 ```bash
 make dev
@@ -50,7 +50,7 @@ pnpm typecheck
 pnpm build
 ```
 
-Without an API key everything works except the chat, which shows a clear "no API key" message.
+Without an Anthropic key everything works except the chat, which shows a clear "no API key" message. Without a VA key, the chat still answers but can't look up VA locations; it points people to the VA.gov locator instead.
 
 ## Demo script (about 5 minutes)
 
@@ -64,7 +64,7 @@ Without an API key everything works except the chat, which shows a clear "no API
    - Moving to Maryland
 4. Click **Build my timeline**. Walk through the timeline: TAP shows as overdue (retirees should start 24 months out), BDD claim window, Survivor Benefit Plan, health coverage, VGLI and Maryland benefits. Each step has a plain-language explanation, a "Learn more" link to the official source, and the documents it needs. Check one item off to show progress saving.
 5. Go to **My documents**. Point out the "Demo only" warning, then click **Load sample documents**. Four fake documents (each marked SAMPLE) are attached and the progress bar moves. Preview the sample DD-214. Note that service treatment records are still not started, and the SSN and bank items are "have ready" reminders that are never collected.
-6. In **Ask the Navigator**, click **"Which documents am I still missing?"**. The answer is streamed and specific to this person. Then ask **"When should I file for disability?"**: the answer cites VA.gov, and the official pages it used are listed under **Sources** below it. Answers come from the official-source notes in `content/va/`, not the model's memory.
+6. In **Ask the Navigator**, click **"Which documents am I still missing?"**. The answer is streamed and specific to this person. Then ask **"Where's the nearest VA benefits office to Annapolis?"**: the Navigator looks up VA locations through the VA sandbox (needs the VA key), lists them with address and phone, and reminds you to call ahead. Then ask **"When should I file for disability?"**: the answer cites VA.gov, and the official pages it used are listed under **Sources** below it. Answers come from the official-source notes in `content/va/`, not the model's memory.
 7. Optional: click **Explain this document** on the sample DD-214 to show how AI could summarize a document in production (only fake sample text is ever sent).
 8. Finish with **Clear my data** to show everything is erased from the browser.
 
@@ -83,6 +83,7 @@ Two tabs only connect in the same browser profile (they talk over a `BroadcastCh
 ```
 apps/web          React + Vite + TanStack Router/Query + Tailwind (landing, intake, timeline, documents, chat UI)
 services/chat     Hono server: POST /api/chat -> Claude via the Anthropic SDK (streamed NDJSON)
+services/va-mcp   MCP server for VA Lighthouse sandbox APIs (facilities, document intake); the chat starts it
 content/va        Official-source notes the chat answers from (RAG), one topic per file
 packages/shared   Zod schemas and types, plus the reviewable rule files:
                     milestones.ts  timeline milestone rules

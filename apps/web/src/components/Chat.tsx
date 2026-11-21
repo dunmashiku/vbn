@@ -10,6 +10,7 @@ const STARTERS = [
   "When should I file for disability?",
   "What happens to my health coverage?",
   "Which documents am I still missing?",
+  "Where's the nearest VA benefits office?",
 ];
 
 interface UiMessage extends ChatMessage {
@@ -18,6 +19,8 @@ interface UiMessage extends ChatMessage {
   display?: string;
   /** Official pages retrieved for this answer (assistant messages only). */
   sources?: ChatSource[];
+  /** Set while a tool runs, e.g. "Looking up VA locations". */
+  activity?: string;
 }
 
 interface ChatApi {
@@ -63,6 +66,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           setMessages((prev) => prev.map((m) => (m.id === vars.replyId ? { ...m, content: m.content + chunk } : m))),
         ac.signal,
         (sources) => setMessages((prev) => prev.map((m) => (m.id === vars.replyId ? { ...m, sources } : m))),
+        (activity) => setMessages((prev) => prev.map((m) => (m.id === vars.replyId ? { ...m, activity } : m))),
       );
     },
     onError: (err, vars) => {
@@ -203,7 +207,8 @@ export function ChatPanel() {
             ) : (
               <div key={m.id} className="mr-4 rounded-2xl rounded-bl-sm bg-paper px-4 py-3 text-ink">
                 <span className="sr-only">Navigator said: </span>
-                {m.content ? <Markdown text={m.content} /> : <span className="text-muted">Thinking…</span>}
+                {m.content ? <Markdown text={m.content} /> : <span className="text-muted">{m.activity ? `${m.activity}…` : "Thinking…"}</span>}
+                {m.content && m.activity && m.id === streamingId && <p className="mt-2 text-sm text-muted">{m.activity}…</p>}
                 {m.content && m.id !== streamingId && <Sources sources={m.sources} answer={m.content} />}
               </div>
             ),

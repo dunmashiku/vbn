@@ -1,0 +1,28 @@
+{
+  "name": "@vbn/va-mcp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MCP server wrapping VA Lighthouse sandbox APIs (Facilities, Benefits Intake)",
+  "bin": {
+    "vbn-va-mcp": "./src/server.ts"
+  },
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "fixtures": "tsx scripts/make-fixture.ts",
+    "test": "vitest run --exclude src/live.test.ts",
+    "test:live": "VA_LIVE_TEST=1 vitest run src/live.test.ts",
+    "inspect": "npx @modelcontextprotocol/inspector tsx src/server.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.1.1"
+  }
+}

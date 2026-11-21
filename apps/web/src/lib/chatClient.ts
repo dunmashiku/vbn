@@ -22,6 +22,7 @@ export async function streamChat(
   onText: (chunk: string) => void,
   signal?: AbortSignal,
   onSources?: (sources: ChatSource[]) => void,
+  onTool?: (label: string) => void,
 ): Promise<void> {
   const res = await fetch("/api/chat", {
     method: "POST",
@@ -55,6 +56,7 @@ export async function streamChat(
       const event = JSON.parse(line) as ChatStreamEvent;
       if (event.type === "text") onText(event.text);
       else if (event.type === "sources") onSources?.(event.sources);
+      else if (event.type === "tool") onTool?.(event.label);
       else if (event.type === "error") throw new Error(event.message);
     }
   }

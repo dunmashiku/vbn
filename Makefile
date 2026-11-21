@@ -3,16 +3,18 @@
 
 ENV_FILE     := services/chat/.env
 ENV_EXAMPLE  := services/chat/.env.example
+VA_ENV_FILE  := services/va-mcp/.env
+VA_ENV_EXAMPLE := services/va-mcp/.env.example
 WEB_URL      := http://localhost:5173
 CHAT_URL     := http://127.0.0.1:8787
 
 .DEFAULT_GOAL := help
-.PHONY: help setup install env check-key dev typecheck test eval-rag build preview health stop clean reset
+.PHONY: help setup install env check-key dev typecheck test eval-rag test-va-live mcp-inspector build preview health stop clean reset
 
 help: ## Show this help
 	@echo "Benefits Navigator - local commands"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  make %-10s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  make %-14s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "First time: make setup, add your key to $(ENV_FILE), then make dev"
 
@@ -23,11 +25,16 @@ install: ## Install dependencies with pnpm
 	@command -v pnpm >/dev/null || { echo "pnpm is required. Install it with: npm install -g pnpm"; exit 1; }
 	pnpm install
 
-env: ## Create services/chat/.env from the example (keeps an existing one)
+env: ## Create services/chat/.env and services/va-mcp/.env from the examples (keeps existing ones)
 	@if [ -f $(ENV_FILE) ]; then \
 		echo "$(ENV_FILE) already exists, leaving it as is."; \
 	else \
 		cp $(ENV_EXAMPLE) $(ENV_FILE) && echo "Created $(ENV_FILE). Add your ANTHROPIC_API_KEY to it."; \
+	fi
+	@if [ -f $(VA_ENV_FILE) ]; then \
+		echo "$(VA_ENV_FILE) already exists, leaving it as is."; \
+	else \
+		cp $(VA_ENV_EXAMPLE) $(VA_ENV_FILE) && echo "Created $(VA_ENV_FILE). Add your VA sandbox VA_API_KEY to it."; \
 	fi
 
 check-key: ## Check that ANTHROPIC_API_KEY is set (never prints the key)
@@ -36,6 +43,11 @@ check-key: ## Check that ANTHROPIC_API_KEY is set (never prints the key)
 	else \
 		echo "ANTHROPIC_API_KEY is missing. Run 'make env', then add the key to $(ENV_FILE)."; \
 		echo "The app still runs without it; only the chat will say the key is missing."; \
+	fi
+	@if [ -f $(VA_ENV_FILE) ] && grep -Eq '^VA_(API|FACILITIES_API)_KEY=.+' $(VA_ENV_FILE); then \
+		echo "VA sandbox key is set in $(VA_ENV_FILE)."; \
+	else \
+		echo "VA sandbox key is missing. Add VA_API_KEY to $(VA_ENV_FILE) to enable VA location lookups."; \
 	fi
 
 dev: ## Start the web app and chat service (http://localhost:5173)
@@ -53,6 +65,12 @@ test: ## Run all Vitest suites
 
 eval-rag: ## Check retrieval quality on 10 sample questions
 	pnpm eval:rag
+
+test-va-live: ## Read-only live tests against the VA sandbox (needs the VA key)
+	pnpm --filter @vbn/va-mcp test:live
+
+mcp-inspector: ## Open the MCP Inspector on the VA sandbox MCP server
+	cd services/va-mcp && npx @modelcontextprotocol/inspector node_modules/.bin/tsx src/server.ts
 
 build: ## Production build of the web app
 	pnpm --filter @vbn/web build

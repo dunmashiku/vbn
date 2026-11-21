@@ -3,7 +3,7 @@
 Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and keep code portable to AWS (API Gateway + Lambda) without rewrites. See `docs/architecture.md`.
 
 ## Layout
-- pnpm workspace: `apps/web` (React, Vite, TanStack Router + Query, Tailwind v4), `services/chat` (Hono + Anthropic SDK), `packages/shared` (Zod schemas, types, rules).
+- pnpm workspace: `apps/web` (React, Vite, TanStack Router + Query, Tailwind v4), `services/chat` (Hono + Anthropic SDK), `services/va-mcp` (MCP server for VA sandbox APIs), `packages/shared` (Zod schemas, types, rules).
 - `pnpm dev` runs both apps (web on 5173, chat on 8787, `/api` proxied). `pnpm typecheck` and `pnpm test` (Vitest) must pass after every change.
 - `packages/shared` exports TypeScript source directly (no build step).
 
@@ -33,6 +33,14 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 - Retrieved passages go in the `<official_sources>` system block; the browser gets a `sources` event before the text. Answers must cite those URLs and say "I'm not sure" when passages don't cover the question.
 - After changing content or retrieval, run `pnpm eval:rag` (10 questions, must stay at or above 80%) and `pnpm test`.
 
+## VA MCP server (`services/va-mcp`)
+- Sandbox only: `VA_API_BASE_URL` must be `https://sandbox-api.va.gov` or the server refuses to start. Keys live in `services/va-mcp/.env` (`VA_API_KEY`, or per-API overrides) and are never logged, returned in tool results or sent to the browser.
+- Before changing a tool, read the VA OpenAPI spec (`https://api.va.gov/internal/docs/facilities/v1/openapi.json`, `https://api.va.gov/internal/docs/benefits-intake/v1/openapi.json`) and keep the doc URL comment above each call. If the docs and a request disagree, follow the docs and say so.
+- Validate every tool input and every VA response with Zod; return plain-language errors. Keep to 60 requests per minute and retry 429/5xx with backoff.
+- Log to stderr only (stdout is the MCP protocol): tool name, status and duration. Never document contents or personal data.
+- Upload tools read only PDFs inside `fixtures/`, use the fake test veteran, and require `confirm: true`. They never reach the chat: the chat allowlist (`CHAT_TOOL_ALLOWLIST` in `services/chat/src/mcp/vaTools.ts`) has `find_va_facilities` only.
+- Every tool has mocked-HTTP tests; the live sandbox test runs only with `VA_LIVE_TEST=1` (and uploads only with `VA_LIVE_UPLOAD=1`).
+
 ## Chat service
 - `services/chat/src/app.ts` is a runtime-agnostic Hono app; `server.ts` is the Node entry. Add a Lambda entry by wrapping the same app.
 - Model: `claude-opus-5-5` (override with `CHAT_MODEL`), streamed, `effort: "low"`, server-side refusal fallback enabled. The system prompt is in `systemPrompt.ts`; per-request context is a separate system block so the stable prompt can be cached.
@@ -46,4 +54,4 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 - Icons are hand-written SVG in `components/Icons.tsx`. Markdown in chat uses the small safe renderer in `components/Markdown.tsx` (no `innerHTML`).
 
 ## Dependencies
-Ask before adding any dependency. Approved: React, Vite, TanStack Router/Query, Tailwind, Hono, `@hono/node-server`, Anthropic SDK, Zod, MiniSearch, Vitest, `@fontsource/*`, tsx, and the TypeScript/Vite/Tailwind tooling already in the repo.
+Ask before adding any dependency. Approved: React, Vite, TanStack Router/Query, Tailwind, Hono, `@hono/node-server`, Anthropic SDK, `@modelcontextprotocol/sdk`, Zod, MiniSearch, Vitest, `@fontsource/*`, tsx, and the TypeScript/Vite/Tailwind tooling already in the repo.

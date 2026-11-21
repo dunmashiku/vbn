@@ -72,5 +72,7 @@ export type ChatStreamEvent =
   /** Sent first: the official pages retrieved for this question. */
   | { type: "sources"; sources: ChatSource[] }
   | { type: "text"; text: string }
+  /** The model is calling a tool, e.g. looking up VA locations. */
+  | { type: "tool"; name: string; label: string }
   | { type: "error"; message: string }
   | { type: "done" };

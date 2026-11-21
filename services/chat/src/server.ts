@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { serve } from "@hono/node-server";
 import { createApp } from "./app";
+import { connectVaTools } from "./mcp/vaTools";
 import { createRetriever } from "./rag/retriever";
 
 // Load services/chat/.env if present (Node's built-in loader; no dotenv needed).
@@ -22,10 +23,18 @@ if (!apiKey) {
 const retriever = await createRetriever();
 console.log(`Indexed ${retriever.size} passages from official-source notes in content/va.`);
 
+// Starts services/va-mcp over stdio as a child process (so `pnpm dev` runs it too).
+const tools = await connectVaTools();
+if (tools) console.log(`VA MCP tools available to chat: ${tools.tools.map((t) => t.name).join(", ")}`);
+const shutdown = () => void tools?.close().finally(() => process.exit(0));
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+
 const app = createApp({
   anthropic: apiKey ? new Anthropic({ apiKey }) : null,
   model,
   retriever,
+  tools,
 });
 
 serve({ fetch: app.fetch, port, hostname: "127.0.0.1" }, (info) => {

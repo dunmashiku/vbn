@@ -127,6 +127,7 @@ Expect it to name the **service treatment records** and point to the official so
 
 **Optional, pick one:**
 - On the sample DD-214, click **Explain this document**. "In production this could check a real DD-214 against the person's answers. In the demo, only fake sample text is ever sent."
+- Ask **"Where's the nearest VA benefits office to Annapolis?"** It looks up VA locations live from the VA's test system and lists address and phone, with a reminder to call ahead. Needs the VA sandbox key in `services/va-mcp/.env`.
 - Type `My SSN is 000-00-0000` and press Enter. The message is blocked before it's sent.
   > "It won't even send something that looks like a Social Security or account number."
 

@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { stream } from "hono/streaming";
 import { rateLimit } from "./rateLimit";
+import type { ToolProvider } from "./mcp/vaTools";
 import type { Retriever } from "./rag/retriever";
 import { SYSTEM_PROMPT, contextBlock, sourcesBlock } from "./systemPrompt";
 
@@ -11,7 +12,7 @@ import { SYSTEM_PROMPT, contextBlock, sourcesBlock } from "./systemPrompt";
  * The Hono app is runtime-agnostic: server.ts runs it on Node for local dev,
  * and a future lambda.ts can wrap the same app with `hono/aws-lambda`.
  */
-export function createApp(opts: { anthropic: Anthropic | null; model: string; retriever: Retriever; clientKey?: (c: { req: { header: (n: string) => string | undefined } }) => string }) {
+export function createApp(opts: { anthropic: Anthropic | null; model: string; retriever: Retriever; tools?: ToolProvider | null; clientKey?: (c: { req: { header: (n: string) => string | undefined } }) => string }) {
   const app = new Hono();
 
   // Request log without bodies: method, path, status and duration only.
@@ -69,36 +70,74 @@ export function createApp(opts: { anthropic: Anthropic | null; model: string; re
 
       return stream(c, async (out) => {
         const send = (e: ChatStreamEvent) => out.write(JSON.stringify(e) + "\n");
-        const ms = opts.anthropic!.beta.messages.stream({
-          model: opts.model,
-          max_tokens: 4096,
-          // Chat answers are short and latency-sensitive.
-          output_config: { effort: "low" },
-          // Server-side fallback if the model declines for policy reasons.
-          betas: ["server-side-fallback-2026-07-01"],
-          fallbacks: "default",
-          system: [
-            { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
-            { type: "text", text: contextBlock(context) },
-            { type: "text", text: sourcesBlock(passages) },
-          ],
-          messages: apiMessages,
-        });
-        out.onAbort(() => ms.abort());
+        const tools = opts.tools?.tools.length ? opts.tools : null;
+        let current: { abort: () => void } | null = null;
+        out.onAbort(() => current?.abort());
         await send({ type: "sources", sources });
 
         try {
-          for await (const event of ms) {
-            if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-              await send({ type: "text", text: event.delta.text });
-            }
-          }
-          const final = await ms.finalMessage();
-          if (final.stop_reason === "refusal") {
-            await send({
-              type: "text",
-              text: "\n\nI can't help with that one. For questions about your benefits, VA.gov and a free accredited representative are good places to start.",
+          // Manual tool loop: stream each turn; when the model asks for a tool,
+          // run it through the MCP server and continue. Capped to keep replies fast.
+          let convo: Anthropic.Beta.BetaMessageParam[] = apiMessages;
+          let jsonRetries = 0;
+          let usedFacilities = false;
+          for (let turn = 0; turn < 4; turn++) {
+            const ms = opts.anthropic!.beta.messages.stream({
+              model: opts.model,
+              max_tokens: 4096,
+              // Chat answers are short and latency-sensitive.
+              output_config: { effort: "low" },
+              // Server-side fallback if the model declines for policy reasons.
+              betas: ["server-side-fallback-2026-07-01"],
+              fallbacks: "default",
+              system: [
+                { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+                { type: "text", text: contextBlock(context) },
+                { type: "text", text: sourcesBlock(passages) },
+              ],
+              ...(tools ? { tools: tools.tools } : {}),
+              messages: convo,
             });
+            current = ms;
+            for await (const event of ms) {
+              if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+                await send({ type: "text", text: event.delta.text });
+              }
+            }
+            let final: Anthropic.Beta.BetaMessage;
+            try {
+              final = await ms.finalMessage();
+              jsonRetries = 0;
+            } catch (err) {
+              // With eager input streaming, unparseable tool input rejects here: re-issue the turn once or twice.
+              if (err instanceof Anthropic.APIError || jsonRetries++ >= 2) throw err;
+              continue;
+            }
+
+            if (final.stop_reason === "refusal") {
+              await send({
+                type: "text",
+                text: "\n\nI can't help with that one. For questions about your benefits, VA.gov and a free accredited representative are good places to start.",
+              });
+              break;
+            }
+            const toolUses = final.content.filter((b): b is Anthropic.Beta.BetaToolUseBlock => b.type === "tool_use");
+            if (final.stop_reason !== "tool_use" || !toolUses.length || !tools) break;
+
+            const results: Anthropic.Beta.BetaToolResultBlockParam[] = [];
+            for (const t of toolUses) {
+              await send({ type: "tool", name: t.name, label: TOOL_LABELS[t.name] ?? "Looking that up" });
+              const started = Date.now();
+              const r = await tools.call(t.name, t.input);
+              // Tool name, duration and status only.
+              console.log(`tool ${t.name} ${r.isError ? "error" : "ok"} ${Date.now() - started}ms`);
+              if (t.name === "find_va_facilities" && !r.isError) usedFacilities = true;
+              results.push({ type: "tool_result", tool_use_id: t.id, content: r.text, is_error: r.isError });
+            }
+            convo = [...convo, { role: "assistant", content: final.content }, { role: "user", content: results }];
+            if (usedFacilities) {
+              await send({ type: "sources", sources: [...sources, { title: "VA facility locator", url: "https://www.va.gov/find-locations/" }] });
+            }
           }
           await send({ type: "done" });
         } catch (err) {
@@ -118,6 +157,10 @@ export function createApp(opts: { anthropic: Anthropic | null; model: string; re
 
   return app;
 }
+
+const TOOL_LABELS: Record<string, string> = {
+  find_va_facilities: "Looking up VA locations",
+};
 
 /**
  * The search query: the latest question, plus the previous one when the latest

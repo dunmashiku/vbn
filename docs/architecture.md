@@ -7,7 +7,9 @@ Browser (React SPA, localhost:5173)
   ├─ localStorage: intake answers, milestone progress, document statuses
   ├─ IndexedDB:    attached files (never leave the browser)
   └─ POST /api/chat (Vite proxy) ──> Hono on Node (localhost:8787) ──> Anthropic API (Claude)
-                                        └─ retrieve(): MiniSearch index over content/va/*.md
+                                        ├─ retrieve(): MiniSearch index over content/va/*.md
+                                        └─ MCP client ──stdio──> services/va-mcp ──> VA Lighthouse sandbox
+                                                                 (Facilities, Benefits Intake)
 ```
 
 - `packages/shared` holds the Zod schemas, types and the rule files (`milestones.ts`, `documents.ts`). Both the web app and the chat service import it, so request validation is identical on both sides.
@@ -58,6 +60,18 @@ CloudTrail (+ S3 data events), CloudWatch Logs/metrics, AWS Config
 - Changed or removed pages are flagged for human content review before the new text is served. Notes marked `verify: true` stay out of production until reviewed.
 - `pnpm eval:rag` grows into a regression suite that runs in CI on every content or retrieval change.
 - Milestone and document rules move from TypeScript files to reviewed rows in Aurora with an audit history, but keep the same shape as `milestones.ts` and `documents.ts`.
+
+### VA Lighthouse APIs through MCP
+
+**Demo (built).** `services/va-mcp` is an MCP server (official TypeScript SDK) with four tools over the VA Lighthouse **sandbox**: `find_va_facilities` (Facilities API), and `validate_document`, `upload_test_document` and `get_upload_status` (Benefits Intake API). The chat service starts it as a child process over stdio and exposes only `find_va_facilities` to Claude, so a person can ask "Where's the nearest VA benefits office to Annapolis?" The document tools are for developer testing in the MCP Inspector. The server refuses to start unless its base URL is `https://sandbox-api.va.gov`, keeps to the VA's 60 requests per minute, validates every input and response with Zod, and logs only tool name, status and duration.
+
+**Production path.**
+- **Same MCP server, hosted.** Package `services/va-mcp` with a streamable HTTP transport and deploy it to **Amazon Bedrock AgentCore Runtime**. Register it as an MCP server target on **Amazon Bedrock AgentCore Gateway**, which gives agents one governed endpoint for all tools, with inbound auth (Cognito or WorkOS JWTs) and outbound auth through **AgentCore Identity**.
+- **The agent.** The Navigator agent (today's chat logic, the system prompt and the `retrieve()` interface) runs on **AgentCore Runtime** with **Claude on Amazon Bedrock**, and reaches VA tools only through the Gateway. The chat code keeps using its `ToolProvider` interface; only the connection changes from stdio to the Gateway URL.
+- **VA keys.** VA API keys live in **AWS Secrets Manager** (or as AgentCore Identity API-key credentials backed by it), are read only by the Gateway target or the MCP server, and are never sent to browsers, logs or the model.
+- **Production VA access.** The sandbox is open, but production Lighthouse access requires the VA's review and approval of the application, including its security and privacy practices. Until then, everything stays on the sandbox host.
+- **Veterans authorizing access.** For APIs that act on a veteran's own records (for example claims status or benefits documents), the veteran signs in through the **VA's OpenID Connect (OAuth 2.0) sign-in** and consents. AgentCore Identity handles the authorization code flow and stores the per-user tokens, and the Gateway passes them to the target on that veteran's behalf. The Navigator never sees VA passwords.
+- **Same guardrails.** The chat allowlist (read-only lookups only), Zod validation, rate limiting and "names and statuses only" logging carry over. Any tool that writes to the VA needs an explicit confirmation step from the veteran, plus audit logging in CloudTrail and the application audit log.
 
 ### Auth
 - **Cognito** (or **WorkOS** if organizations need SSO for their advocates) issues JWTs that API Gateway validates.
