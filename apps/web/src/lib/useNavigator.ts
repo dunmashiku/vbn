@@ -67,9 +67,10 @@ const fmtLong = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric"
 export const formatDate = (iso: string) => fmt.format(new Date(`${iso}T00:00:00Z`));
 export const formatDateLong = (iso: string) => fmtLong.format(new Date(`${iso}T00:00:00Z`));
 
+/** "Start Nov 25, 2025 · Due Nov 24, 2026": labeled so a one-year window doesn't read as a typo. */
 export function formatWindow(opens: string, due: string): string {
-  if (opens === due) return `By ${formatDate(due)}`;
-  return `${formatDate(opens)} – ${formatDate(due)}`;
+  if (opens === due) return `Due ${formatDate(due)}`;
+  return `Start ${formatDate(opens)} · Due ${formatDate(due)}`;
 }
 
 export function learnMoreLabel(url: string): string {
