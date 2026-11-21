@@ -67,6 +67,26 @@ The product still never submits anything to the VA. Veterans upload to VA.gov th
 ### Medical records and HIPAA
 Real medical records (service treatment records, private records) are health information. Before handling them in production, sign a **HIPAA Business Associate Agreement (BAA)** with AWS (through AWS Artifact) and use **HIPAA-eligible services only** for anything that stores, processes or transmits them. Confirm each service on the AWS HIPAA eligible services list at build time (S3, KMS, Lambda, API Gateway, Aurora, Textract, Bedrock, GuardDuty, CloudTrail and CloudWatch should each be checked), and keep model prompts and logs free of record contents unless the BAA covers that path.
 
+### Representative help: shared plans and live sessions
+
+**Why build it.** Accredited representatives already file through the VA's own systems once a veteran appoints them (VA Form 21-22 for an organization, 21-22a for an individual). They don't need another filing tool. What slows the first meeting down is reconstructing the person's situation and chasing documents. The Navigator's job is to hand them a prepared case and an easy way to talk, then step aside.
+
+**Facts that shape the design**
+- There is no "HIPAA approved" or "HIPAA certified" product. HHS doesn't certify anything. HIPAA applies to covered entities (providers, health plans, clearinghouses) and to business associates that handle protected health information for them under a Business Associate Agreement (BAA).
+- Veterans service organizations and accredited representatives generally aren't covered entities, so HIPAA may not legally apply to these sessions. We should still build to HIPAA-level safeguards, because medical details come up and partners such as health systems may be covered entities.
+- Video vendors that will sign a BAA include Zoom (healthcare plans), Doxy.me and Amazon Chime SDK, which is HIPAA eligible under the AWS BAA and fits this stack. Confirm each vendor's current terms before choosing.
+
+**Demo (built).**
+- *Share:* the veteran picks an organization and agrees to share a read-only summary: intake answers, milestone dates and statuses, and document names and statuses. Files, Social Security numbers, bank details and chat history are never shared. Shares end after 14 days or when the veteran clicks Stop sharing. Sharing doesn't appoint anyone or file anything.
+- *Service officer console (`/rep`):* a queue identified by case code, not name, plus a suggested first-meeting agenda generated from the plan (overdue items, the BDD window, missing documents, appointing the organization).
+- *Live session:* browser WebRTC between two tabs, with signaling over `BroadcastChannel`, so no server is involved. Media is always encrypted (DTLS-SRTP). The veteran's plan travels over a WebRTC data channel and updates live; the veteran can hide it at any time. Screen sharing nudges people toward sharing a single tab. Nothing is recorded.
+
+**Production**
+- Shares become server-side records in Aurora (veteran id, organization id, scope, expiry, revoked-at) checked on every read, with every view written to the audit log. The officer console requires a staff account tied to an accredited organization, through Cognito or WorkOS SSO.
+- Live video moves to **Amazon Chime SDK** under the AWS BAA. A Lambda creates the meeting and issues join tokens only to the veteran and to staff of the shared organization. Recording stays off by default; if an organization enables it, recordings go to the KMS-encrypted bucket with the same retention and access rules as documents.
+- Optional: a waiting room, scheduling through the organization's calendar, and SMS or email reminders through Amazon SES or AWS End User Messaging.
+- The veteran always decides whether to formally appoint a representative. That happens on VA forms, outside the Navigator.
+
 ### Auditing and operations
 - **CloudTrail** organization trail with log file validation, S3 data events on the documents bucket, and logs in a locked-down bucket.
 - CloudWatch dashboards and alarms for error rates, latency, Bedrock throttling and spend.

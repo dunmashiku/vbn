@@ -4,6 +4,9 @@ import { PRODUCT_NAME } from "./config";
 import { loadIntake } from "./lib/storage";
 import { AppLayout } from "./routes/AppLayout";
 import { DocumentsPage } from "./routes/Documents";
+import { HelpPage } from "./routes/Help";
+import { RepConsolePage, RepSessionPage } from "./routes/Rep";
+import { VeteranSessionPage } from "./routes/VeteranSession";
 import { LandingPage } from "./routes/Landing";
 import { StartPage } from "./routes/Start";
 import { TimelinePage } from "./routes/Timeline";
@@ -51,11 +54,29 @@ const appRoute = createRoute({
 });
 const timelineRoute = createRoute({ getParentRoute: () => appRoute, path: "/timeline", component: TimelinePage });
 const documentsRoute = createRoute({ getParentRoute: () => appRoute, path: "/documents", component: DocumentsPage });
+const helpRoute = createRoute({ getParentRoute: () => appRoute, path: "/help", component: HelpPage });
+
+// Live session for the veteran: full-width, outside the app layout (no chat panel).
+const veteranSessionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/session/$code",
+  component: VeteranSessionPage,
+  beforeLoad: () => {
+    if (!loadIntake()) throw redirect({ to: "/start" });
+  },
+});
+
+// Service officer side (demo: no sign-in; production requires accredited staff accounts).
+const repRoute = createRoute({ getParentRoute: () => rootRoute, path: "/rep", component: RepConsolePage });
+const repSessionRoute = createRoute({ getParentRoute: () => rootRoute, path: "/rep/session/$code", component: RepSessionPage });
 
 const routeTree = rootRoute.addChildren([
   landingRoute,
   startRoute,
-  appRoute.addChildren([timelineRoute, documentsRoute]),
+  appRoute.addChildren([timelineRoute, documentsRoute, helpRoute]),
+  veteranSessionRoute,
+  repRoute,
+  repSessionRoute,
 ]);
 
 export const router = createRouter({ routeTree, scrollRestoration: true, defaultPreload: "intent" });

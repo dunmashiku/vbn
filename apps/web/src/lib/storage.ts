@@ -9,6 +9,8 @@ const KEYS = {
   intake: "bn.intake.v1",
   milestones: "bn.milestones.v1",
   documents: "bn.documents.v1",
+  /** Plans the veteran shared with a representative (demo stand-in for a server-side share). */
+  shares: "bn.shares.v1",
 } as const;
 
 const CHANGE_EVENT = "bn-storage";
@@ -43,6 +45,9 @@ export const saveMilestones = (v: MilestoneProgress) => write(KEYS.milestones, v
 
 export const loadDocStatuses = (): DocumentStatuses => read<DocumentStatuses>(KEYS.documents) ?? {};
 export const saveDocStatuses = (v: DocumentStatuses) => write(KEYS.documents, v);
+
+export const loadSharesRaw = (): unknown[] => read<unknown[]>(KEYS.shares) ?? [];
+export const saveSharesRaw = (v: unknown[]) => write(KEYS.shares, v);
 
 export function clearLocalData() {
   for (const k of Object.values(KEYS)) {
@@ -86,5 +91,6 @@ export function useStoredState() {
     intake: loadIntake(),
     milestones: loadMilestones(),
     docStatuses: loadDocStatuses(),
+    sharesRaw: loadSharesRaw(),
   };
 }

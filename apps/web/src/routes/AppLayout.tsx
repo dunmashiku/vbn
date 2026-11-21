@@ -34,7 +34,7 @@ function ClearDataButton() {
 }
 
 const tabClass =
-  "rounded-md px-3 py-2 font-semibold text-navy-900 hover:bg-paper-2 aria-[current=page]:bg-navy-900 aria-[current=page]:text-paper";
+  "whitespace-nowrap rounded-md px-2.5 py-2 text-base font-semibold text-navy-900 sm:px-3 sm:text-lg hover:bg-paper-2 aria-[current=page]:bg-navy-900 aria-[current=page]:text-paper";
 
 export function AppLayout() {
   return (
@@ -48,6 +48,7 @@ export function AppLayout() {
             <ul className="flex gap-1">
               <li><Link to="/timeline" className={tabClass}>My timeline</Link></li>
               <li><Link to="/documents" className={tabClass}>My documents</Link></li>
+              <li><Link to="/help" className={tabClass}>Get help</Link></li>
             </ul>
           </nav>
           <ClearDataButton />
