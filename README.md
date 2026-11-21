@@ -8,6 +8,22 @@ A free, personal timeline of military transition benefit deadlines, a document c
 
 Requirements: Node 22 or newer and pnpm 10.
 
+### Quick start with make
+
+```bash
+make setup
+```
+
+Add your key to `services/chat/.env` (`ANTHROPIC_API_KEY=...`), then:
+
+```bash
+make dev
+```
+
+Run `make` to list every target (`check-key`, `health`, `typecheck`, `build`, `preview`, `stop`, `clean`, `reset`).
+
+### Without make
+
 ```bash
 pnpm install
 ```
