@@ -80,7 +80,7 @@ Two tabs only connect in the same browser profile (they talk over a `BroadcastCh
 
 ### Sign-in screens (demo only)
 
-**Sign in** on the landing page opens `/signin`. Veterans see production-style options (VA.gov sign-in with Login.gov or ID.me, or an email link) and can always continue without an account. Service officers go through work email, an accreditation check and on to the console; **Fill in the demo officer** fills the form. Nothing is checked or stored, and no account is created.
+**Build my timeline** never needs an account. Afterwards, the timeline shows a **Save your timeline** card that offers a free account. **Sign in** in the header opens the veteran sign-in (**Continue with ID.me**, **Continue with email**, or continue without an account). Service officers use **For service officers** in the header (or in the Menu on smaller screens) or the button in "For organizations": work email, an accreditation check, then the console. **Fill in the demo officer** fills the form. Nothing is checked or stored, and no account is created.
 
 ## What's where
 

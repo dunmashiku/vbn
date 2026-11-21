@@ -8,7 +8,7 @@ import { HelpPage } from "./routes/Help";
 import { RepConsolePage, RepSessionPage } from "./routes/Rep";
 import { VeteranSessionPage } from "./routes/VeteranSession";
 import { LandingPage } from "./routes/Landing";
-import { OfficerSignInPage, parseMode, SignInChooserPage, VeteranSignInPage } from "./routes/SignIn";
+import { OfficerSignInPage, parseMode, VeteranSignInPage } from "./routes/SignIn";
 import { StartPage } from "./routes/Start";
 import { TimelinePage } from "./routes/Timeline";
 
@@ -46,7 +46,14 @@ const landingRoute = createRoute({ getParentRoute: () => rootRoute, path: "/", c
 const startRoute = createRoute({ getParentRoute: () => rootRoute, path: "/start", component: StartPage });
 
 // Demo sign-in screens: nothing is stored and no account is created.
-const signInRoute = createRoute({ getParentRoute: () => rootRoute, path: "/signin", component: SignInChooserPage });
+// Veterans sign in from the header; officers use their own link. /signin is kept as a short URL.
+const signInRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/signin",
+  beforeLoad: () => {
+    throw redirect({ to: "/signin/veteran", search: { mode: "signin" } });
+  },
+});
 const veteranSignInRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/signin/veteran",

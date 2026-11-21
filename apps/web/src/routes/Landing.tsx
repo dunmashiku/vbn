@@ -45,11 +45,11 @@ function Header() {
         <Link to="/" className="rounded-md" aria-label={`${PRODUCT_NAME} home`}>
           <Wordmark />
         </Link>
-        <nav aria-label="Main" className="hidden lg:block">
-          <ul className="flex items-center gap-1">
+        <nav aria-label="Main" className="hidden xl:block">
+          <ul className="flex items-center">
             {NAV.map((n) => (
               <li key={n.href}>
-                <a href={n.href} className="rounded-md px-3 py-2 font-medium text-navy-900 hover:bg-paper-2">
+                <a href={n.href} className="whitespace-nowrap rounded-md px-2 py-2 font-medium text-navy-900 hover:bg-paper-2">
                   {n.label}
                 </a>
               </li>
@@ -57,15 +57,18 @@ function Header() {
           </ul>
         </nav>
         <div className="flex items-center gap-2">
-          <Link to="/signin" className={`btn btn-outline ${scrolled ? "btn-sm" : ""} hidden sm:inline-flex`}>
+          <Link to="/signin/officer" className="hidden whitespace-nowrap rounded-md px-1 py-2 text-base font-medium text-navy-800 underline xl:inline">
+            For service officers
+          </Link>
+          <Link to="/signin/veteran" search={{ mode: "signin" }} className={`btn btn-outline ${scrolled ? "btn-sm" : ""} hidden whitespace-nowrap md:inline-flex`}>
             Sign in
           </Link>
-          <Link to="/start" className={`btn btn-primary ${scrolled ? "btn-sm" : ""} hidden sm:inline-flex`}>
+          <Link to="/start" className={`btn btn-primary ${scrolled ? "btn-sm" : ""} hidden whitespace-nowrap sm:inline-flex`}>
             Build my timeline
           </Link>
           <button
             type="button"
-            className="btn btn-sm btn-outline lg:hidden"
+            className="btn btn-sm btn-outline xl:hidden"
             aria-expanded={open}
             aria-controls={menuId}
             onClick={() => setOpen((o) => !o)}
@@ -76,7 +79,7 @@ function Header() {
         </div>
       </div>
       {open && (
-        <nav id={menuId} aria-label="Main" className="border-t border-line bg-paper lg:hidden">
+        <nav id={menuId} aria-label="Main" className="border-t border-line bg-paper xl:hidden">
           <ul className="container-page grid gap-1 py-3">
             {NAV.map((n) => (
               <li key={n.href}>
@@ -85,9 +88,12 @@ function Header() {
                 </a>
               </li>
             ))}
-            <li className="grid gap-2 pt-2 sm:hidden">
-              <Link to="/start" className="btn btn-primary w-full">Build my timeline</Link>
-              <Link to="/signin" className="btn btn-outline w-full">Sign in</Link>
+            <li className="grid gap-2 pt-2 md:hidden">
+              <Link to="/start" className="btn btn-primary w-full sm:hidden">Build my timeline</Link>
+              <Link to="/signin/veteran" search={{ mode: "signin" }} className="btn btn-outline w-full">Sign in</Link>
+            </li>
+            <li>
+              <Link to="/signin/officer" className="block rounded-md px-3 py-3 font-medium text-navy-900 hover:bg-paper-2">For service officers</Link>
             </li>
           </ul>
         </nav>
@@ -116,10 +122,7 @@ function Hero() {
             </Link>
             <a href="#how-it-works" className="btn btn-outline">See how it works</a>
           </div>
-          <p className="mt-4 text-base text-paper/80">
-            Takes about a minute. No account needed, or{" "}
-            <Link to="/signin/veteran" search={{ mode: "signup" }} className="link">create a free account</Link> to use it on any device.
-          </p>
+          <p className="mt-4 text-base text-paper/80">Takes about a minute. No account needed.</p>
         </div>
         <div className="fade-in [animation-delay:150ms]">
           <TimelineMock />

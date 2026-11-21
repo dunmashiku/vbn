@@ -76,9 +76,10 @@ CloudTrail (+ S3 data events), CloudWatch Logs/metrics, AWS Config
 ### Auth
 - **Cognito** (or **WorkOS** if organizations need SSO for their advocates) issues JWTs that API Gateway validates.
 - Roles: veteran (owns their data), advocate (sees only people who explicitly shared with their organization), admin. Sharing is an explicit, revocable grant.
-- **Veterans** sign in either with an email link (Cognito passwordless) or with their **VA.gov sign-in (Login.gov or ID.me)** through the VA's OpenID Connect service, which needs VA approval. Login.gov only works with government agencies, so a private app reaches it through the VA's sign-in rather than directly. Using the Navigator without an account stays possible.
+- **Veterans** never need an account to build a timeline. Afterwards, a "Save your timeline" card offers one. They sign in with **ID.me** (an OpenID Connect provider in Cognito) or an **email link** (Cognito passwordless).
+- **Connecting VA.gov** is a separate, optional, later step for VA records such as claim status: the veteran signs in through the VA's OpenID Connect service (Login.gov or ID.me) and consents. It needs VA production approval. Login.gov only works with government agencies, so a private app reaches it through the VA's sign-in rather than directly.
 - **Service officers** sign in with a work email link plus a second step (or their organization's SSO through WorkOS), and their VA accreditation number is checked against the VA's accredited representative list. An organization admin approves each officer.
-- The demo shows these as screens only (`/signin`, `/signin/veteran`, `/signin/officer`): nothing is checked or stored, and no account is created.
+- The demo shows these as screens only (`/signin/veteran`, `/signin/officer`; `/signin` redirects to the veteran page): nothing is checked or stored, and no account is created.
 
 ### Production document uploads
 1. The browser asks an authenticated Lambda for an upload slot. The Lambda checks the user and checklist item, then returns a **short-lived pre-signed S3 PUT URL** (a few minutes) scoped to one object key, content type and maximum size.

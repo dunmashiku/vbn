@@ -62,10 +62,8 @@ Point out:
 - **What's covered:** disability, health coverage, Survivor Benefit Plan, life insurance, GI Bill, DD-214, state benefits.
 - **Free, accredited help:**
   > "This matters to us: filing a VA claim is free. We never charge, and we never file for anyone. We connect people to free accredited representatives, and we warn them about claim sharks."
-- **Sign in** (top right): click it briefly to show the two doors, one for veterans and one for service officers. Veterans would use their VA.gov sign-in (Login.gov or ID.me) or an email link, and can always skip the account:
-  > "No account is needed to get value. An account is only for picking up on another device or sharing with a representative. These are demo screens; nothing is saved."
-
-  Click **Back to home**.
+- **Header:** **Build my timeline** is the main way in, with no account. **Sign in** is for people coming back, and **For service officers** is the separate door for advocates.
+  > "No account is needed to get value. We offer one only after you've seen your timeline."
 - **Privacy**, **For organizations** (it has a **Service officer sign in** button), the **FAQ** ("Is this the VA?" No, said plainly), and the **Veterans Crisis Line** in the footer.
 
 > "No stock photos, no VA logos or military seals. We're not affiliated and we don't pretend to be."
@@ -98,6 +96,11 @@ Walk through:
 - **VA disability claim (BDD):** "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
 - **Survivor Benefit Plan:** only appears for retirees.
 - Every card has a plain-language explanation, the documents it needs, and a **Learn more** link to the official source.
+
+Point out the **Save your timeline** card under the summary:
+> "Now that they've seen something useful, we offer a free account: ID.me or an email link. Later, they could connect their VA.gov account to see claim status. These are demo screens; nothing is saved."
+
+Optionally click **Create a free account**, then **Continue with ID.me** and **Continue (demo)** to come back. Or click **Not now**.
 
 **Do:** tick **Mark as done** on one step. The progress bar moves.
 

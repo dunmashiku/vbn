@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { useRef, useState } from "react";
 import { ChatPanel, ChatProvider, useChat } from "../components/Chat";
 import { CrisisLine, PrototypeBanner, SkipLink, Wordmark } from "../components/Common";
 import { IconTrash } from "../components/Icons";
@@ -8,28 +9,57 @@ import { deleteAllFiles } from "../lib/docStore";
 import { clearLocalData } from "../lib/storage";
 import { FILES_QUERY_KEY } from "../lib/useNavigator";
 
+/**
+ * Confirms in an in-page <dialog> rather than window.confirm, which some browsers
+ * and embedded previews suppress (it returns false with no prompt).
+ */
 function ClearDataButton() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { reset } = useChat();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  const clear = async () => {
+    setBusy(true);
+    try {
+      reset();
+      clearLocalData();
+      await deleteAllFiles();
+      qc.removeQueries({ queryKey: FILES_QUERY_KEY });
+    } finally {
+      setBusy(false);
+      dialogRef.current?.close();
+    }
+    void navigate({ to: "/" });
+  };
+
   return (
-    <button
-      type="button"
-      aria-label="Clear my data"
-      className="btn btn-sm btn-outline"
-      onClick={async () => {
-        if (!window.confirm("Clear my data? This erases your answers, progress and any attached documents from this browser. It can't be undone.")) return;
-        reset();
-        clearLocalData();
-        await deleteAllFiles();
-        qc.removeQueries({ queryKey: FILES_QUERY_KEY });
-        void navigate({ to: "/" });
-      }}
-    >
-      <IconTrash size={18} />
-      <span className="sm:hidden">Clear</span>
-      <span className="hidden sm:inline">Clear my data</span>
-    </button>
+    <>
+      <button type="button" aria-label="Clear my data" className="btn btn-sm btn-outline" onClick={() => dialogRef.current?.showModal()}>
+        <IconTrash size={18} />
+        <span className="sm:hidden">Clear</span>
+        <span className="hidden sm:inline">Clear my data</span>
+      </button>
+      <dialog
+        ref={dialogRef}
+        aria-labelledby="clear-title"
+        aria-describedby="clear-desc"
+        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-xl border border-line bg-white p-6 text-navy-950 shadow-xl backdrop:bg-navy-950/50"
+      >
+        <h2 id="clear-title" className="font-sans text-2xl font-bold text-navy-900">Clear my data?</h2>
+        <p id="clear-desc" className="mt-3 text-base">
+          This erases your answers, progress, shared plans and any attached documents from this browser. It can't be undone.
+        </p>
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          {/* First focusable control, so Enter or a stray click doesn't erase anything. */}
+          <button type="button" className="btn btn-outline" onClick={() => dialogRef.current?.close()} disabled={busy}>Cancel</button>
+          <button type="button" className="btn bg-bad text-white hover:opacity-90" onClick={clear} disabled={busy}>
+            <IconTrash size={18} /> {busy ? "Clearing…" : "Yes, clear my data"}
+          </button>
+        </div>
+      </dialog>
+    </>
   );
 }
 

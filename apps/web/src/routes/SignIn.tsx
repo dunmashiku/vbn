@@ -2,12 +2,13 @@
  * Demo sign-up and sign-in screens for veterans and service officers.
  * Screens only: nothing is checked, stored or sent, and no account is created
  * (the demo has no accounts; see CLAUDE.md). Production options are described
- * in docs/architecture.md.
+ * in docs/architecture.md. Connecting a VA.gov account (Login.gov or ID.me)
+ * is a separate, optional step offered on the timeline.
  */
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { PrototypeBanner, SiteFooter, SkipLink, useDocumentTitle, Wordmark } from "../components/Common";
-import { IconAlert, IconArrowRight, IconCheck, IconShield, IconUsers } from "../components/Icons";
+import { IconAlert, IconArrowRight, IconCheck, IconShield } from "../components/Icons";
 import { LINKS, PRODUCT_NAME } from "../config";
 import { DEMO_ORGS } from "../lib/help";
 import { loadIntake } from "../lib/storage";
@@ -64,45 +65,9 @@ function Field({ label, hint, error, inputRef, ...input }: {
   );
 }
 
-/* ---------- /signin: choose who you are ---------- */
-
-export function SignInChooserPage() {
-  useDocumentTitle(`Sign in · ${PRODUCT_NAME}`);
-  return (
-    <Shell>
-      <p className="eyebrow">Demo</p>
-      <h1 className="mt-2 text-4xl text-navy-900 sm:text-5xl">Sign in</h1>
-      <p className="prose-measure mt-4 text-lg text-muted">Choose the option that fits you.</p>
-      <ul className="mt-8 grid gap-4">
-        <li>
-          <Link to="/signin/veteran" search={{ mode: "signin" }} className="card flex items-center gap-4 p-5 hover:border-navy-600">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-navy-900 text-gold"><IconShield size={24} /></span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-xl font-semibold text-navy-900">I'm a service member, veteran or family member</span>
-              <span className="block text-base text-muted">Save your timeline and documents checklist across devices.</span>
-            </span>
-            <IconArrowRight size={22} className="shrink-0 text-navy-800" />
-          </Link>
-        </li>
-        <li>
-          <Link to="/signin/officer" className="card flex items-center gap-4 p-5 hover:border-navy-600">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-navy-900 text-gold"><IconUsers size={24} /></span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-xl font-semibold text-navy-900">I help veterans at an organization</span>
-              <span className="block text-base text-muted">For VA-accredited service officers. Opens the service officer console.</span>
-            </span>
-            <IconArrowRight size={22} className="shrink-0 text-navy-800" />
-          </Link>
-        </li>
-      </ul>
-      <DemoNote>Demo screens: no account is created and nothing you enter is saved. You can always use {PRODUCT_NAME} without an account.</DemoNote>
-    </Shell>
-  );
-}
-
 /* ---------- /signin/veteran ---------- */
 
-type VeteranStep = { kind: "choose" } | { kind: "va" } | { kind: "email" } | { kind: "email-sent"; email: string };
+type VeteranStep = { kind: "choose" } | { kind: "idme" } | { kind: "email" } | { kind: "email-sent"; email: string };
 
 export function VeteranSignInPage({ mode }: { mode: SignInMode }) {
   const signup = mode === "signup";
@@ -124,23 +89,23 @@ export function VeteranSignInPage({ mode }: { mode: SignInMode }) {
   // Signed-in people land on their timeline; new people build one first.
   const finish = () => navigate({ to: loadIntake() ? "/timeline" : "/start" });
 
-  if (step.kind === "va") {
+  if (step.kind === "idme") {
     return (
       <Shell>
         <p className="eyebrow">Demo · step 2 of 2</p>
-        <h1 ref={headingRef} tabIndex={-1} className="mt-2 text-4xl text-navy-900 outline-none">Signing in with VA.gov</h1>
+        <h1 ref={headingRef} tabIndex={-1} className="mt-2 text-4xl text-navy-900 outline-none">{signup ? "Creating your account with ID.me" : "Signing in with ID.me"}</h1>
         <div className="card mt-6 p-6">
           <p className="text-lg">
-            In the real product, you'd go to VA's own sign-in page, sign in with <strong>Login.gov</strong> or <strong>ID.me</strong>,
-            and approve sharing with {PRODUCT_NAME}. Then you'd come back here, signed in.
+            In the real product, you'd go to ID.me to sign in, or create an ID.me account if you don't have one, and approve sharing
+            your name and email with {PRODUCT_NAME}. Then you'd come back here, signed in.
           </p>
-          <p className="mt-3 text-base text-muted">We would never see your password. This needs VA approval before launch.</p>
+          <p className="mt-3 text-base text-muted">We would never see your ID.me password.</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <button type="button" className="btn btn-primary" onClick={finish}>Continue (demo) <IconArrowRight size={20} /></button>
             <button type="button" className="btn btn-outline" onClick={() => setStep({ kind: "choose" })}>Back</button>
           </div>
         </div>
-        <DemoNote>Nothing was sent to VA, Login.gov or ID.me, and no account was created.</DemoNote>
+        <DemoNote>Nothing was sent to ID.me, and no account was created.</DemoNote>
       </Shell>
     );
   }
@@ -196,12 +161,8 @@ export function VeteranSignInPage({ mode }: { mode: SignInMode }) {
       </p>
 
       <div className="mt-8 grid gap-3">
-        <button type="button" className="btn btn-primary w-full !justify-between text-left" onClick={() => setStep({ kind: "va" })}>
-          <span>
-            <span className="block">Continue with your VA.gov sign-in</span>
-            <span className="block text-base font-normal text-paper/85">Login.gov or ID.me</span>
-          </span>
-          <IconArrowRight size={20} />
+        <button type="button" className="btn btn-primary w-full !justify-between" onClick={() => setStep({ kind: "idme" })}>
+          Continue with ID.me <IconArrowRight size={20} />
         </button>
         <button type="button" className="btn btn-outline w-full !justify-between" onClick={() => { setError(undefined); setStep({ kind: "email" }); }}>
           Continue with email <IconArrowRight size={20} />
@@ -216,6 +177,10 @@ export function VeteranSignInPage({ mode }: { mode: SignInMode }) {
         ) : (
           <>New here? <Link to="/signin/veteran" search={{ mode: "signup" }} className="link">Create a free account</Link></>
         )}
+      </p>
+
+      <p className="mt-2 text-base">
+        Service officer? <Link to="/signin/officer" className="link">Sign in here</Link>
       </p>
 
       <DemoNote>

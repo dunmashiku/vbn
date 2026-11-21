@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { labelFor, type MilestoneStatus } from "@vbn/shared";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../components/Common";
 import { IconCheck, IconExternal, IconFile } from "../components/Icons";
 import { PRODUCT_NAME } from "../config";
@@ -20,6 +20,28 @@ const DOT: Record<MilestoneStatus, string> = {
   overdue: "bg-bad border-bad",
   done: "bg-ok border-ok",
 };
+
+/** Offers a free account after the timeline exists (value first). Demo only: the sign-up screens store nothing. */
+function SaveTimelineCard() {
+  const [hidden, setHidden] = useState(false);
+  if (hidden) return null;
+  return (
+    <section aria-labelledby="save-heading" className="mt-6 rounded-xl border-2 border-gold bg-white p-5 sm:p-6">
+      <h2 id="save-heading" className="font-sans text-xl font-bold text-navy-900">Save your timeline</h2>
+      <p className="prose-measure mt-1 text-base">
+        Create a free account to pick it up on any device and share it with a representative. It's optional: everything works without one.
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Link to="/signin/veteran" search={{ mode: "signup" }} className="btn btn-primary">Create a free account</Link>
+        <button type="button" className="btn btn-quiet" onClick={() => setHidden(true)}>Not now</button>
+      </div>
+      <p className="prose-measure mt-4 border-t border-line pt-3 text-base text-muted">
+        Later, with an account, you could also connect your VA.gov account (Login.gov or ID.me) to see your claim status here.
+        Optional, and not part of this demo.
+      </p>
+    </section>
+  );
+}
 
 export function TimelinePage() {
   useDocumentTitle(`My timeline · ${PRODUCT_NAME}`);
@@ -72,6 +94,8 @@ export function TimelinePage() {
           <Link to="/start" className="link text-base">Edit my answers</Link>
         </div>
       </section>
+
+      <SaveTimelineCard />
 
       <ol className="relative mt-10">
         <span aria-hidden="true" className="absolute bottom-4 left-[11px] top-4 w-0.5 bg-line sm:left-[13px]" />
