@@ -1,0 +1,218 @@
+# Demo script: Benefits Navigator
+
+**Length:** about 20 minutes of demo, then discussion.
+**Audience:** Edwin and potential partners.
+**Goal:** show that one tool gets a veteran from "where do I start?" to a prepared meeting with a free accredited representative, and agree on next steps for a pilot.
+
+---
+
+## The night before
+
+- [ ] Pull the latest `main` and run `make setup`.
+- [ ] Put the Anthropic API key in `services/chat/.env`, then run `make check-key`.
+- [ ] Run `make dev`, open http://localhost:5173 in **Chrome**, and do one full run-through of this script.
+- [ ] Ask the Navigator one question so you know the key works and roughly how fast replies come back.
+- [ ] Run the live session once with your real camera, and allow camera access for `localhost` permanently so the prompt doesn't appear mid-demo.
+
+## 15 minutes before
+
+- [ ] Run `make dev` (or `make stop` first if a port is busy), then `make health`. It should report `"configured":true`.
+- [ ] In Chrome, open **one window with two tabs**:
+  - Tab 1: http://localhost:5173 (the veteran)
+  - Tab 2: http://localhost:5173/rep (the service officer)
+- [ ] In tab 1, if there's leftover data from a rehearsal, go to My timeline and click **Clear my data**, then return to the landing page.
+- [ ] Zoom Chrome to 110–125% so the room can read it. Turn on Do Not Disturb. Close other tabs, email and anything personal.
+- [ ] Have this script on a second screen or printed.
+
+---
+
+## Run of show
+
+| # | Section | Time | Screen |
+|---|---------|------|--------|
+| 1 | The problem | 1 min | Landing page |
+| 2 | Landing page tour | 2 min | Landing page |
+| 3 | Intake | 1 min | `/start` |
+| 4 | Personal timeline | 3 min | My timeline |
+| 5 | Documents | 2 min | My documents |
+| 6 | Ask the Navigator | 3 min | Chat panel |
+| 7 | Getting free, accredited help | 4 min | Get help + `/rep` |
+| 8 | Privacy | 1 min | Clear my data |
+| 9 | Path to production | 2 min | Talking points |
+| 10 | The ask | open | Discussion |
+
+---
+
+## 1. The problem (1 min)
+
+**Screen:** landing page, top of the hero.
+
+> "More than 200,000 people leave the military every year. The benefits they've earned depend on doing things in the right order, often months before their last day. A disability claim has a window that closes 90 days before separation. Retirees make a survivor benefit decision that's hard to undo. And the GAO found about 70% didn't start planning a year out.
+>
+> We built Benefits Navigator to answer one question for each person: what do I need to do, by when, and with what paperwork?"
+
+## 2. Landing page tour (2 min)
+
+**Do:** scroll slowly from top to bottom.
+
+Point out:
+- **Hero:** "Your military transition, in the right order." The timeline card is a sample of what each person gets.
+- **Why it matters:** each stat links to its source (DAV, GAO).
+- **What's covered:** disability, health coverage, Survivor Benefit Plan, life insurance, GI Bill, DD-214, state benefits.
+- **Free, accredited help:**
+  > "This matters to us: filing a VA claim is free. We never charge, and we never file for anyone. We connect people to free accredited representatives, and we warn them about claim sharks."
+- **Privacy**, **For organizations**, the **FAQ** ("Is this the VA?" No, said plainly), and the **Veterans Crisis Line** in the footer.
+
+> "No stock photos, no VA logos or military seals. We're not affiliated and we don't pretend to be."
+
+## 3. Intake (1 min)
+
+**Do:** click **Build my timeline**.
+
+> "Seven questions, about a minute, no account. We never ask for a name, Social Security number or service records."
+
+Enter the sample person, or click **Fill in the demo example**:
+- Army
+- Retirement, about 8 months from today
+- Married
+- Dependent children: Yes
+- Service-connected condition: Not sure
+- Maryland
+
+Click **Build my timeline**.
+
+## 4. Personal timeline (3 min)
+
+**Screen:** My timeline.
+
+> "This is built from those seven answers. Eight steps, in the order to start them."
+
+Walk through:
+- **Transition Assistance Program shows Overdue.** "Retirees should start about 24 months out. This person is 8 months out, so they need to act now. That's exactly the gap the GAO found."
+- **GI Bill shows Due soon.** "A transfer to family has to be approved while still serving."
+- **VA disability claim (BDD):** "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
+- **Survivor Benefit Plan:** only appears for retirees.
+- Every card has a plain-language explanation, the documents it needs, and a **Learn more** link to the official source.
+
+**Do:** tick **Mark as done** on one step. The progress bar moves.
+
+> "Progress is saved in this browser only."
+
+## 5. Documents (2 min)
+
+**Do:** click **My documents**.
+
+> "Same answers, now a checklist of the documents this person needs, grouped by step, each with why and where to get the official copy."
+
+- Point out the yellow warning: *"Demo only: use the sample documents."*
+- Click **Load sample documents**. It goes to **4 of 7 ready**.
+- On the **DD-214**, click **Preview**. "Clearly fake, stamped SAMPLE."
+- Point out what's still missing: **service treatment records**.
+- Point out the **Social Security numbers** and **bank details** items:
+  > "These are reminders only. They're never uploaded, typed or stored."
+
+> "The Navigator organizes. It never submits anything. The veteran uploads to VA.gov or hands documents to their representative."
+
+## 6. Ask the Navigator (3 min)
+
+**Do:** in the chat panel, click **"Which documents am I still missing?"**
+
+> "The assistant already knows this person's answers, timeline and checklist, so the answer is about them, not generic."
+
+Expect it to name the **service treatment records** and point to the official source. The exact wording changes each time.
+
+**Optional, pick one:**
+- On the sample DD-214, click **Explain this document**. "In production this could check a real DD-214 against the person's answers. In the demo, only fake sample text is ever sent."
+- Type `My SSN is 000-00-0000` and press Enter. The message is blocked before it's sent.
+  > "It won't even send something that looks like a Social Security or account number."
+
+## 7. Getting free, accredited help (4 min)
+
+> "Here's what we think matters most for organizations like yours: getting someone to a free accredited representative, prepared."
+
+**Veteran side (tab 1):**
+1. Click **Get help**.
+2. Choose **Sample County Veterans Service Office**. All three organizations are fictional for the demo.
+3. Point out the two lists, **Shared (read-only)** and **Never shared**:
+   > "Files, Social Security numbers and bank details are never shared. Access ends after 14 days, and they can stop sharing at any time. Sharing doesn't appoint anyone or file anything."
+4. Tick the agreement box, pick **Start a live session now**, and click **Share my plan**.
+
+**Service officer side (tab 2, `/rep`):**
+1. The new case is at the top, identified by a code, not a name.
+2. Show the **suggested first-meeting agenda**: the overdue step, the claim window, the missing documents, and appointing the organization on VA Form 21-22.
+   > "Instead of spending the first half hour rebuilding someone's situation, the officer starts here."
+3. Click **Join live session**.
+
+**Back in tab 1:** click **Join live session** on the shared plan.
+- The tabs connect with live video. Both mics start muted, which avoids echo on one laptop.
+- Show **Share a tab or screen**. It nudges you toward sharing just one tab.
+- In tab 1, untick **Show my plan during this session**. In tab 2 the plan changes to "Hidden by the veteran."
+  > "The veteran stays in control the whole time."
+- Click **End session**.
+
+If asked about HIPAA, see the questions section below.
+
+## 8. Privacy (1 min)
+
+**Do:** in tab 1, go to My timeline and click **Clear my data**, then confirm.
+
+> "Everything is gone: answers, progress and documents. In this preview, nothing lives on our servers. No accounts, no tracking, no cookies."
+
+## 9. Path to production (2 min)
+
+Talking points (details in `docs/architecture.md`):
+- Built to move to AWS without a rewrite: the website behind CloudFront and a web firewall, the chat on API Gateway and Lambda, and Claude through Amazon Bedrock so data stays in our AWS account.
+- Answers grounded in official VA content that's re-checked on a schedule.
+- Real accounts for veterans and for accredited staff, with access only while a share is active, and every view logged.
+- Real document uploads go to encrypted storage and are scanned for malware before use. Real medical records require a HIPAA Business Associate Agreement and HIPAA-eligible services only.
+- Video moves to Amazon Chime SDK, which is covered by the AWS BAA.
+- Every deadline and document rule is marked for review against VA.gov before launch.
+
+## 10. The ask (discussion)
+
+Pick the questions that fit the room:
+1. Would your service officers use a shared plan and agenda like this? What's missing for them?
+2. Would you pilot it with a small group, say 10 to 20 transitioning service members and one or two officers?
+3. Which organizations should we talk to next: county offices, VSOs, transition offices, churches, nonprofits?
+4. Who can review our deadline and document rules for accuracy?
+5. Do your officers prefer video in the Navigator, or their own tools (phone, Zoom, in person)?
+
+---
+
+## Likely questions
+
+**"Is this the VA?"**
+No. We're not affiliated with the VA or the Department of Defense. We point people to VA.gov and other official sources.
+
+**"Does it file claims?"**
+No, never. Accredited representatives file through the VA's own systems once the veteran appoints them. We get people to them prepared.
+
+**"Is it HIPAA compliant?"**
+"There's no such thing as 'HIPAA approved'; the government doesn't certify products. HIPAA applies to health care providers, health plans, and the companies that handle health records for them under a Business Associate Agreement. Most service organizations aren't covered, but we're building to that standard anyway. In production, anything touching medical records runs on HIPAA-eligible AWS services under a BAA, and video uses Chime SDK under the same agreement."
+
+**"Where does the data go?"**
+In this preview it stays in the browser. The chat sends the question plus a summary of the answers and checklist to generate a reply. It never sends files, and the server doesn't log messages.
+
+**"How accurate are the dates?"**
+They come from general rules that we've marked for review against VA.gov before launch. Every step links to the official source, and the timeline tells people to confirm with their representative.
+
+**"What does it cost?"**
+Free for veterans, always. For organizations, we're here to learn what would help; there's no pricing yet.
+
+**"Why AI?"**
+People have questions at 10 p.m. that don't need a meeting. The assistant answers in plain language using their situation, says "I'm not sure" rather than guessing, and points to official sources and free representatives for anything that needs a person.
+
+---
+
+## If something goes wrong
+
+| Problem | What to do |
+|---|---|
+| Chat says the API key is missing | Check `services/chat/.env`, restart `make dev`, and run `make health`. Meanwhile keep going; the rest of the app works without it. |
+| Chat is slow | Keep talking about the timeline. Replies stream in as they arrive. |
+| No internet | Everything except the chat works offline. Skip section 6 and describe it. |
+| Live session stuck on "Waiting…" | Both tabs must be in the **same Chrome window**. Reload the officer tab, then click Join again in the veteran tab. |
+| Camera prompt or no video | Click Allow. If the camera still fails, the session connects anyway and the plan still syncs, so show the plan panel and screen share. |
+| Echo or feedback | Keep both mics muted. They start muted. |
+| Port in use when starting | Run `make stop`, then `make dev`. |
+| Timeline or shares from a rehearsal still showing | Click **Clear my data**. Shares are cleared too. |
