@@ -98,7 +98,9 @@ Two cards start open: **Transition Assistance Program** (Overdue) and **GI Bill*
 
 Walk through:
 - **Transition Assistance Program, open, Overdue.** "Retirees should start about 24 months out. This person is 8 months out. Seeing it now gives them time to catch up, with their transition office and a representative."
-  - On this card, point out the plain-language explanation, **Documents for this step** (each links to My documents), and **Learn more on VA.gov**.
+  - On this card, point out the plain-language explanation, **Documents for this step**, and **Learn more on VA.gov**.
+  - The documents use short names, each with its status on the same line ("DD-214 · Not started"). Click one to jump to it on My documents.
+    > "The timeline stays scannable. The full name, why you need it and where to get it are one click away."
 - **GI Bill, open, Due soon.** "A transfer to family has to be approved while still serving."
 - **VA disability claim (BDD), closed.** Click its title to open it. "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
 - **Survivor Benefit Plan, closed:** "This one only appears for retirees." No need to open it.
@@ -118,13 +120,13 @@ Optionally click **Save to a free account**. The sign-up page also mentions conn
 
 **Do:** click **My documents**.
 
-> "Same answers, now a checklist of the documents this person needs, grouped by step, each with why and where to get the official copy."
+> "Same answers, now a checklist of the documents this person needs, grouped by step, each with its full name, why it's needed and where to get the official copy."
 
 - Point out the yellow warning: *"Demo only: use the sample documents."*
 - Click **Load sample documents**. It goes to **4 of 7 ready**.
 - On the **DD-214**, click **Preview**. "Clearly fake, stamped SAMPLE."
 - Point out what's still missing: **service treatment records**.
-- Point out the **Social Security numbers** and **bank details** items:
+- Point out the **Social Security numbers** and **direct deposit** (bank details) items:
   > "These are reminders only. They're never uploaded, typed or stored."
 
 > "The Navigator organizes. It never submits anything. The veteran uploads to VA.gov or hands documents to their representative."
