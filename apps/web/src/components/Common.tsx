@@ -26,7 +26,7 @@ export function Wordmark({ dark = false }: { dark?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2.5">
       <Mark size={34} />
-      <span className={`whitespace-nowrap font-serif text-xl font-semibold tracking-tight ${dark ? "text-paper" : "text-navy-900"}`}>
+      <span className={`font-serif text-xl leading-tight sm:whitespace-nowrap font-semibold tracking-tight ${dark ? "text-paper" : "text-navy-900"}`}>
         {PRODUCT_NAME}
       </span>
     </span>

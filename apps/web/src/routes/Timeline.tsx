@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { labelFor, type MilestoneStatus } from "@vbn/shared";
 import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../components/Common";
-import { IconCheck, IconExternal, IconFile } from "../components/Icons";
+import { IconCheck, IconChevronDown, IconExternal, IconFile } from "../components/Icons";
 import { PRODUCT_NAME } from "../config";
 import { loadMilestones, saveMilestones } from "../lib/storage";
 import { formatDateLong, formatWindow, learnMoreLabel, useNavigatorData } from "../lib/useNavigator";
@@ -21,44 +21,46 @@ const DOT: Record<MilestoneStatus, string> = {
   done: "bg-ok border-ok",
 };
 
-/** Offers a free account after the timeline exists (value first). Demo only: the sign-up screens store nothing. */
-function SaveTimelineCard() {
-  const [hidden, setHidden] = useState(false);
-  if (hidden) return null;
-  return (
-    <section aria-labelledby="save-heading" className="mt-6 rounded-xl border-2 border-gold bg-white p-5 sm:p-6">
-      <h2 id="save-heading" className="font-sans text-xl font-bold text-navy-900">Save your timeline</h2>
-      <p className="prose-measure mt-1 text-base">
-        Create a free account to pick it up on any device and share it with a representative. It's optional: everything works without one.
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Link to="/signin/veteran" search={{ mode: "signup" }} className="btn btn-primary">Create a free account</Link>
-        <button type="button" className="btn btn-quiet" onClick={() => setHidden(true)}>Not now</button>
-      </div>
-      <p className="prose-measure mt-4 border-t border-line pt-3 text-base text-muted">
-        Later, with an account, you could also connect your VA.gov account (Login.gov or ID.me) to see your claim status here.
-        Optional, and not part of this demo.
-      </p>
-    </section>
-  );
-}
-
 export function TimelinePage() {
   useDocumentTitle(`My timeline · ${PRODUCT_NAME}`);
   const data = useNavigatorData();
+  // Which cards are open. Starts with what needs attention (overdue or due soon), or the next step if nothing does.
+  const [expanded, setExpanded] = useState<Set<string> | null>(null);
 
-  // Scroll to a milestone linked from the landing page (e.g. /timeline#m-bdd).
   useEffect(() => {
+    if (!data || expanded) return;
+    const urgent = data.timeline.filter((t) => t.status === "overdue" || t.status === "due-soon").map((t) => t.rule.id);
+    const next = data.timeline.find((t) => t.status !== "done")?.rule.id;
+    const initial = new Set<string>(urgent.length ? urgent : next ? [next] : []);
+    const hash = window.location.hash.slice(1);
+    if (hash.startsWith("m-")) initial.add(hash.slice(2));
+    setExpanded(initial);
+  }, [data, expanded]);
+
+  // Scroll to a milestone linked from the landing page (e.g. /timeline#m-bdd), once its card is open.
+  useEffect(() => {
+    if (!expanded) return;
     const hash = window.location.hash.slice(1);
     if (!hash) return;
-    const el = document.getElementById(hash);
-    if (el) {
+    // Wait a frame so the opened card is laid out (and scroll restoration has run) before scrolling.
+    const frame = requestAnimationFrame(() => {
+      const el = document.getElementById(hash);
+      if (!el) return;
+      el.querySelector<HTMLElement>("h3 button")?.focus({ preventScroll: true });
       el.scrollIntoView({ block: "start" });
-      el.querySelector<HTMLElement>("h2")?.focus();
-    }
-  }, [data !== null]);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [expanded !== null]);
 
   if (!data) return null;
+  const open = expanded ?? new Set<string>();
+  const setCard = (id: string, isOpen: boolean) =>
+    setExpanded((prev) => {
+      const next = new Set(prev ?? []);
+      if (isOpen) next.add(id);
+      else next.delete(id);
+      return next;
+    });
   const { intake, timeline } = data;
   const doneCount = timeline.filter((t) => t.status === "done").length;
   const overdue = timeline.filter((t) => t.status === "overdue").length;
@@ -93,15 +95,35 @@ export function TimelinePage() {
           </div>
           <Link to="/start" className="link text-base">Edit my answers</Link>
         </div>
+        {/* Value first, account later: a quiet offer, never in the way of the steps. Demo screens only. */}
+        <p className="mt-3 text-base text-muted">
+          Saved in this browser.{" "}
+          <Link to="/signin/veteran" search={{ mode: "signup" }} className="link">Save to a free account</Link> to use it on any device.
+        </p>
       </section>
 
-      <SaveTimelineCard />
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="sr-only">Steps</h2>
+        <p className="text-base text-muted" aria-live="polite">
+          {open.size} of {data.timeline.length} steps open
+        </p>
+        <div className="flex gap-2">
+          <button type="button" className="btn btn-sm btn-outline" disabled={open.size === data.timeline.length} onClick={() => setExpanded(new Set(data.timeline.map((t) => t.rule.id)))}>
+            Expand all
+          </button>
+          <button type="button" className="btn btn-sm btn-outline" disabled={open.size === 0} onClick={() => setExpanded(new Set())}>
+            Collapse all
+          </button>
+        </div>
+      </div>
 
-      <ol className="relative mt-10">
+      <ol className="relative mt-4">
         <span aria-hidden="true" className="absolute bottom-4 left-[11px] top-4 w-0.5 bg-line sm:left-[13px]" />
         {timeline.map((t) => {
           const title = t.rule.id === "state-benefits" ? `${t.rule.title}: ${labelFor.state(intake.state)}` : t.rule.title;
           const checkboxId = `done-${t.rule.id}`;
+          const isOpen = open.has(t.rule.id);
+          const bodyId = `body-${t.rule.id}`;
           return (
             <li key={t.rule.id} id={`m-${t.rule.id}`} className="relative scroll-mt-28 pb-8 pl-10 sm:pl-12">
               <span aria-hidden="true" className={`absolute left-0 top-6 grid h-6 w-6 place-items-center rounded-full border-[3px] ring-4 ring-paper sm:h-7 sm:w-7 ${DOT[t.status]}`}>
@@ -114,13 +136,29 @@ export function TimelinePage() {
                     <span className="sr-only">Status: </span>{STATUS_LABEL[t.status]}
                   </span>
                 </div>
-                <h2 id={`h-${t.rule.id}`} tabIndex={-1} className="mt-2 text-2xl text-navy-900 outline-none">{title}</h2>
+                <h3 id={`h-${t.rule.id}`} className="mt-2 text-2xl text-navy-900">
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={bodyId}
+                    onClick={() => setCard(t.rule.id, !isOpen)}
+                    className="-mx-2 flex w-[calc(100%+1rem)] items-start justify-between gap-3 rounded-md px-2 py-1 text-left hover:bg-paper"
+                  >
+                    <span>{title}</span>
+                    <span aria-hidden="true" className="mt-1 flex shrink-0 items-center gap-1 font-sans text-base font-semibold text-navy-800">
+                      <span className="hidden sm:inline">{isOpen ? "Hide" : "Show"}</span>
+                      <IconChevronDown size={22} className={`transition-transform motion-reduce:transition-none ${isOpen ? "rotate-180" : ""}`} />
+                    </span>
+                  </button>
+                </h3>
                 <p className="mt-1 text-base text-muted">{t.windowLabel}</p>
+
+                <div id={bodyId} hidden={!isOpen}>
                 <p className="prose-measure mt-3">{t.rule.explanation}</p>
 
                 {t.documents.length > 0 && (
                   <div className="mt-4 rounded-lg bg-paper p-4">
-                    <h3 className="font-sans text-base font-bold">Documents for this step</h3>
+                    <h4 className="font-sans text-base font-bold">Documents for this step</h4>
                     <ul className="mt-2 space-y-1.5 text-base">
                       {t.documents.map((d) => {
                         const st = data.docStatus(d.id);
@@ -155,6 +193,7 @@ export function TimelinePage() {
                     {learnMoreLabel(t.rule.sources[0].url)}<span className="sr-only">: {t.rule.shortTitle} (opens in a new tab)</span>
                     <IconExternal size={16} />
                   </a>
+                </div>
                 </div>
               </article>
             </li>

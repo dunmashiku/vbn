@@ -116,6 +116,14 @@ export function ChatPanel() {
   const inputId = useId();
   const hintId = useId();
   const panelId = "navigator-chat";
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(open);
+
+  // When the full-screen chat closes (Escape or Close), return focus to the button that opened it.
+  useEffect(() => {
+    if (wasOpen.current && !open && window.matchMedia("(max-width: 1279px)").matches) toggleRef.current?.focus();
+    wasOpen.current = open;
+  }, [open]);
 
   useEffect(() => {
     const el = logRef.current;
@@ -125,7 +133,7 @@ export function ChatPanel() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && window.matchMedia("(max-width: 1023px)").matches) setOpen(false);
+      if (e.key === "Escape" && window.matchMedia("(max-width: 1279px)").matches) setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -149,8 +157,9 @@ export function ChatPanel() {
     <>
       {/* Mobile toggle */}
       <button
+        ref={toggleRef}
         type="button"
-        className="btn btn-primary fixed bottom-4 right-4 z-40 shadow-xl lg:hidden"
+        className="btn btn-primary fixed bottom-4 right-4 z-40 shadow-xl xl:hidden"
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => {
@@ -164,16 +173,16 @@ export function ChatPanel() {
       <aside
         id={panelId}
         aria-labelledby="chat-heading"
-        className={`${open ? "fixed inset-0 z-50 flex" : "hidden"} flex-col bg-white lg:sticky lg:top-[4.5rem] lg:z-auto lg:flex lg:h-[calc(100vh-5.5rem)] lg:rounded-xl lg:border lg:border-line`}
+        className={`${open ? "fixed inset-0 z-50 flex" : "hidden"} flex-col bg-white xl:sticky xl:top-[4.5rem] xl:z-auto xl:flex xl:h-[calc(100vh-5.5rem)] xl:rounded-xl xl:border xl:border-line`}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-line bg-navy-900 px-4 py-3 text-paper on-dark lg:rounded-t-xl">
+        <div className="flex items-start justify-between gap-3 border-b border-line bg-navy-900 px-4 py-3 text-paper on-dark xl:rounded-t-xl">
           <div>
             <h2 id="chat-heading" className="flex items-center gap-2 text-xl">
               <IconSparkle size={20} className="text-gold" /> Ask the Navigator
             </h2>
             <p className="text-sm text-paper/85">Knows your timeline and checklist. General information only.</p>
           </div>
-          <button type="button" className="btn btn-sm btn-outline lg:hidden" onClick={() => setOpen(false)}>
+          <button type="button" className="btn btn-sm btn-outline xl:hidden" onClick={() => setOpen(false)}>
             <IconX size={18} /> Close
           </button>
         </div>

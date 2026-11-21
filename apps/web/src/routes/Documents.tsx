@@ -184,7 +184,7 @@ function DocumentItem({ doc, data }: { doc: DocumentRule; data: NavigatorData })
               <p className="text-sm text-muted">PDF, JPG or PNG, up to 10 MB. Stays in this browser.</p>
             </div>
           )}
-          <input ref={inputRef} type="file" accept={ACCEPT_ATTR} className="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => onFiles(e.target.files)} />
+          <input ref={inputRef} type="file" accept={ACCEPT_ATTR} className="sr-only" tabIndex={-1} aria-hidden="true" aria-label={`File for ${doc.name}`} onChange={(e) => onFiles(e.target.files)} />
           {attach.isPending && <p role="status" className="text-base text-muted">Checking file…</p>}
           {error && <p role="alert" className="flex gap-2 rounded-lg bg-bad-bg px-3 py-2 text-base text-bad"><IconAlert size={20} className="mt-0.5 shrink-0" />{error}</p>}
           <p className="text-sm text-muted">

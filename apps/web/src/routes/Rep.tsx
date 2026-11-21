@@ -24,7 +24,7 @@ function RepShell({ orgId, children }: { orgId: string; children: ReactNode }) {
       <header className="on-dark border-b border-navy-800 bg-navy-900 text-paper">
         <div className="container-page flex flex-wrap items-center justify-between gap-3 py-3">
           <Link to="/rep" search={{ org: orgId }} aria-label="Service officer console home" className="rounded-md"><Wordmark dark /></Link>
-          <div className="flex flex-wrap items-center gap-2 text-base text-paper/90">
+          <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 text-base text-paper/90">
             <IconUsers size={20} className="text-gold" />
             <span>Service officer console ·</span>
             <label htmlFor={selectId} className="sr-only">Your organization (demo)</label>
@@ -32,7 +32,7 @@ function RepShell({ orgId, children }: { orgId: string; children: ReactNode }) {
               id={selectId}
               value={orgId}
               onChange={(e) => void navigate({ to: "/rep", search: { org: e.target.value } })}
-              className="min-h-11 rounded-md border border-paper/40 bg-navy-800 px-2 text-paper"
+              className="min-h-11 w-full max-w-full rounded-md border border-paper/40 bg-navy-800 px-2 text-paper sm:w-auto"
             >
               {DEMO_ORGS.map((o) => <option key={o.id} value={o.id}>{o.name} (demo)</option>)}
             </select>

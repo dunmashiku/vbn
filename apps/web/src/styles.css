@@ -129,18 +129,20 @@
     align-items: center;
     gap: 0.35rem;
     border-radius: 999px;
-    padding: 0.15rem 0.65rem;
-    font-size: 0.8125rem;
+    padding: 0.2rem 0.75rem;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.5;
     white-space: nowrap;
   }
-  .chip-upcoming { background: var(--color-info-bg); color: var(--color-info); }
-  .chip-due-soon { background: var(--color-warn-bg); color: var(--color-warn); }
-  .chip-overdue { background: var(--color-bad-bg); color: var(--color-bad); }
-  .chip-done, .chip-ready { background: var(--color-ok-bg); color: var(--color-ok); }
-  .chip-requested { background: var(--color-warn-bg); color: var(--color-warn); }
-  .chip-not-started { background: var(--color-paper-2); color: var(--color-muted); }
+  /* Status chips: small text, so each pair is at least 7:1 (WCAG AAA), not just the 4.5:1 minimum. */
+  .chip-upcoming { background: var(--color-info-bg); color: #25456e; }      /* 8.0:1 */
+  .chip-due-soon { background: var(--color-warn-bg); color: #5f3a00; }      /* 8.6:1 */
+  .chip-overdue { background: var(--color-bad-bg); color: #7d2315; }        /* 8.1:1 */
+  .chip-done, .chip-ready { background: var(--color-ok-bg); color: #16522c; } /* 7.9:1 */
+  .chip-requested { background: var(--color-warn-bg); color: #5f3a00; }    /* 8.6:1 */
+  .chip-not-started { background: var(--color-paper-2); color: #3a4350; }   /* 8.3:1 */
 
   .link { color: var(--color-navy-800); text-decoration: underline; font-weight: 500; }
   .link:hover { color: var(--color-navy-600); text-decoration-thickness: 2px; }

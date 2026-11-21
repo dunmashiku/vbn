@@ -75,7 +75,7 @@ export function AppLayout() {
         <div className="container-page flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5">
           <Link to="/" aria-label={`${PRODUCT_NAME} home`} className="rounded-md"><Wordmark /></Link>
           <nav aria-label="Your plan" className="order-3 w-full sm:order-none sm:w-auto">
-            <ul className="flex gap-1">
+            <ul className="flex flex-wrap gap-1">
               <li><Link to="/timeline" className={tabClass}>My timeline</Link></li>
               <li><Link to="/documents" className={tabClass}>My documents</Link></li>
               <li><Link to="/help" className={tabClass}>Get help</Link></li>
@@ -84,8 +84,8 @@ export function AppLayout() {
           <ClearDataButton />
         </div>
       </header>
-      <div className="container-page grid gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
-        <main id="main" tabIndex={-1} className="min-w-0 outline-none pb-20 lg:pb-0">
+      <div className="container-page grid gap-8 py-8 xl:grid-cols-[minmax(0,1fr)_27rem]">
+        <main id="main" tabIndex={-1} className="min-w-0 outline-none pb-20 xl:pb-0">
           <Outlet />
         </main>
         <ChatPanel />

@@ -22,7 +22,7 @@
   - Tab 1: http://localhost:5173 (the veteran)
   - Tab 2: http://localhost:5173/signin/officer (the service officer)
 - [ ] In tab 1, if there's leftover data from a rehearsal, go to My timeline and click **Clear my data**, then return to the landing page.
-- [ ] Zoom Chrome to 110–125% so the room can read it. Turn on Do Not Disturb. Close other tabs, email and anything personal.
+- [ ] Zoom Chrome to about 110% so the room can read it. The chat panel sits beside the timeline only when the window is at least 1280px wide after zoom; above roughly 110% on a typical laptop it moves behind an **Ask the Navigator** button at the bottom right, which also works. Turn on Do Not Disturb. Close other tabs, email and anything personal.
 - [ ] Have this script on a second screen or printed.
 
 ---
@@ -58,7 +58,11 @@
 
 Point out:
 - **Hero:** "Your military transition, in the right order." The timeline card is a sample of what each person gets.
-- **Why it matters:** each stat links to its source (DAV, GAO).
+- **Why it matters, "A head start makes a big difference":** three cards, each linked to its source.
+  - **200,000+** service members make the move to civilian life each year (DAV).
+  - **1 year:** transition help is designed to start more than a year before leaving (GAO).
+  - **~70%** started later than that (GAO).
+  > "People are focused on their mission right up to the end. A clear plan makes that head start easier, and that's what we're adding alongside the transition programs already in place."
 - **What's covered:** disability, health coverage, Survivor Benefit Plan, life insurance, GI Bill, DD-214, state benefits.
 - **Free, accredited help:**
   > "This matters to us: filing a VA claim is free. We never charge, and we never file for anyone. We connect people to free accredited representatives, and we warn them about claim sharks."
@@ -88,21 +92,22 @@ Click **Build my timeline**.
 
 **Screen:** My timeline.
 
-> "This is built from those seven answers. Eight steps, in the order to start them."
+> "This is built from those seven answers. Eight steps, in the order to start them. The ones that need attention now are open; the rest are folded so it doesn't feel overwhelming."
 
 Walk through:
 - **Transition Assistance Program shows Overdue.** "Retirees should start about 24 months out. This person is 8 months out, so they need to act now. Seeing it now gives them time to catch up, with their transition office and a representative."
 - **GI Bill shows Due soon.** "A transfer to family has to be approved while still serving."
-- **VA disability claim (BDD):** "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
+- **VA disability claim (BDD):** click its title to open it. "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
 - **Survivor Benefit Plan:** only appears for retirees.
+- **Expand all** opens every step at once; **Collapse all** folds them back to titles and dates.
 - Every card has a plain-language explanation, the documents it needs, and a **Learn more** link to the official source.
 
-Point out the **Save your timeline** card under the summary:
-> "Now that they've seen something useful, we offer a free account: ID.me or an email link. Later, they could connect their VA.gov account to see claim status. These are demo screens; nothing is saved."
+Point out the line under the progress bar, **"Saved in this browser. Save to a free account to use it on any device."**
+> "Now that they've seen something useful, we offer a free account, quietly: ID.me or an email link. These are demo screens; nothing is saved."
 
-Optionally click **Create a free account**, then **Continue with ID.me** and **Continue (demo)** to come back. Or click **Not now**.
+Optionally click **Save to a free account**. The sign-up page also mentions connecting a VA.gov account later for claim status. Click **Continue with ID.me**, then **Continue (demo)** to come back.
 
-**Do:** tick **Mark as done** on one step. The progress bar moves.
+**Do:** tick **Mark as done** on the open Transition Assistance Program card. The progress bar moves.
 
 > "Progress is saved in this browser only."
 

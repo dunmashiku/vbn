@@ -3,7 +3,7 @@
  * Screens only: nothing is checked, stored or sent, and no account is created
  * (the demo has no accounts; see CLAUDE.md). Production options are described
  * in docs/architecture.md. Connecting a VA.gov account (Login.gov or ID.me)
- * is a separate, optional step offered on the timeline.
+ * is a separate, optional, later step, mentioned on the sign-up screen.
  */
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
@@ -170,6 +170,13 @@ export function VeteranSignInPage({ mode }: { mode: SignInMode }) {
         <p className="mt-2 text-center text-base text-muted">or</p>
         <Link to={loadIntake() ? "/timeline" : "/start"} className="btn btn-quiet w-full">Continue without an account</Link>
       </div>
+
+      {signup && (
+        <p className="mt-6 text-base text-muted">
+          Later, with an account, you could also connect your VA.gov account (Login.gov or ID.me) to see your claim status in{" "}
+          {PRODUCT_NAME}. Optional, and not part of this demo.
+        </p>
+      )}
 
       <p className="mt-6 text-base">
         {signup ? (

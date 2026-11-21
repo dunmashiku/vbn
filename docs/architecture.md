@@ -76,8 +76,8 @@ CloudTrail (+ S3 data events), CloudWatch Logs/metrics, AWS Config
 ### Auth
 - **Cognito** (or **WorkOS** if organizations need SSO for their advocates) issues JWTs that API Gateway validates.
 - Roles: veteran (owns their data), advocate (sees only people who explicitly shared with their organization), admin. Sharing is an explicit, revocable grant.
-- **Veterans** never need an account to build a timeline. Afterwards, a "Save your timeline" card offers one. They sign in with **ID.me** (an OpenID Connect provider in Cognito) or an **email link** (Cognito passwordless).
-- **Connecting VA.gov** is a separate, optional, later step for VA records such as claim status: the veteran signs in through the VA's OpenID Connect service (Login.gov or ID.me) and consents. It needs VA production approval. Login.gov only works with government agencies, so a private app reaches it through the VA's sign-in rather than directly.
+- **Veterans** never need an account to build a timeline. Afterwards, one line in the timeline summary offers one. They sign in with **ID.me** (an OpenID Connect provider in Cognito) or an **email link** (Cognito passwordless).
+- **Connecting VA.gov** (mentioned on the sign-up screen) is a separate, optional, later step for VA records such as claim status: the veteran signs in through the VA's OpenID Connect service (Login.gov or ID.me) and consents. It needs VA production approval. Login.gov only works with government agencies, so a private app reaches it through the VA's sign-in rather than directly.
 - **Service officers** sign in with a work email link plus a second step (or their organization's SSO through WorkOS), and their VA accreditation number is checked against the VA's accredited representative list. An organization admin approves each officer.
 - The demo shows these as screens only (`/signin/veteran`, `/signin/officer`; `/signin` redirects to the veteran page): nothing is checked or stored, and no account is created.
 
