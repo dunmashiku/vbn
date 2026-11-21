@@ -37,7 +37,7 @@
 | 4 | Personal timeline | 3 min | My timeline |
 | 5 | Documents | 2 min | My documents |
 | 6 | Ask the Navigator, including a live VA lookup | 4 min | Chat panel |
-| 7 | Getting free, accredited help | 4 min | Get help + `/rep` |
+| 7 | Getting free, accredited help | 4 min | Get help + officer console |
 | 8 | Privacy | 1 min | Clear my data |
 | 9 | Path to production | 2 min | Talking points |
 | 10 | The ask | open | Discussion |
@@ -152,29 +152,34 @@ Expect three offices with distance, address and phone: the pre-discharge sites a
 
 > "Here's what we think matters most for organizations like yours: getting someone to a free accredited representative, prepared."
 
+Both tabs must be in the **same Chrome window** at `localhost:5173`. In this demo, shares live in that browser only.
+
 **Veteran side (tab 1):**
 1. Click **Get help**.
 2. Choose **Sample County Veterans Service Office**. All three organizations are fictional for the demo.
 3. Point out the two lists, **Shared (read-only)** and **Never shared**:
    > "Files, Social Security numbers and bank details are never shared. Access ends after 14 days, and they can stop sharing at any time. Sharing doesn't appoint anyone or file anything."
-4. Tick the agreement box, pick **Start a live session now**, and click **Share my plan**.
+4. Tick the agreement box. Under **How would you like to meet?** pick **In person**, under **When?** pick **Now: I'm at the office**, and click **Share my plan**.
+5. The page jumps to the new share with a large **code** (for example BN-M3HT):
+   > "The veteran tells the officer this code. That's the whole handoff: no names, no email."
 
 **Service officer side (tab 2, `/signin/officer`):**
 1. Click **Fill in the demo officer**, then **Continue**. On the accreditation step:
    > "Only accredited officers get in. In production we check their accreditation number against the VA's list, and their organization approves them."
 
-   Click **Verify and sign in**, then **Open the service officer console**.
-2. The new case is at the top, identified by a code, not a name.
+   Click **Verify and sign in**, then **Open the service officer console**. The header shows **Sample County Veterans Service Office (demo)**.
+2. Type the veteran's code into **Open a case by code** and click **Open**. The case opens.
 3. Show the **suggested first-meeting agenda**: the overdue step, the claim window, the missing documents, and appointing the organization on VA Form 21-22.
    > "Instead of spending the first half hour rebuilding someone's situation, the officer starts here."
-4. Click **Join live session**.
+4. The case says **Meeting in person: review this plan together. No video needed.**
 
-**Back in tab 1:** click **Join live session** on the shared plan.
-- The tabs connect with live video. Both mics start muted, which avoids echo on one laptop.
-- Show **Share a tab or screen**. It nudges you toward sharing just one tab.
-- In tab 1, untick **Show my plan during this session**. In tab 2 the plan changes to "Hidden by the veteran."
-  > "The veteran stays in control the whole time."
-- Click **End session**.
+**Back in tab 1:** click **Show my plan**. This is a large, read-only view for the veteran to turn toward the officer across the desk.
+> "In the same room, nobody needs video. The veteran shows their plan, or the officer opens it with the code."
+
+**Optional, the "only who they chose" moment:** in tab 2, switch the organization at the top to **Lakeside Veterans Help Center (demo)** and type the same code. It says the plan was shared with Sample County, not Lakeside.
+> "The veteran decides which office sees their plan."
+
+**Optional, video for remote help:** share again with **Video** and **Now**. Click **Join video session** in both tabs. They connect with live video; both mics start muted to avoid echo. In tab 1, untick **Show my plan during this session** and tab 2 shows "Hidden by the veteran." Click **End session**.
 
 If asked about HIPAA, see the questions section below.
 
@@ -245,6 +250,8 @@ People have questions at 10 p.m. that don't need a meeting. The assistant answer
 | VA lookup gives no offices, or just links VA.gov | The VA test system may be down or the key missing. The chat falls back to the VA.gov locator on its own, so keep going: "When the VA's system doesn't answer, it sends people to VA.gov instead of guessing." Afterwards, run `make test-va-live`. |
 | Chat is slow | Keep talking about the timeline. Replies stream in as they arrive. |
 | No internet | Everything except the chat works offline. Skip section 6 and describe it. |
+| Console says "No active shared plan has the code…" | The officer tab must be in the same Chrome window at `localhost:5173` (not `127.0.0.1`), and the data must not have been cleared since sharing. Share again and use the new code. |
+| Console says the code "was shared with" another office | Switch the organization at the top of the console to that office, or share again with Sample County. |
 | Live session stuck on "Waiting…" | Both tabs must be in the **same Chrome window**. Reload the officer tab, then click Join again in the veteran tab. |
 | Camera prompt or no video | Click Allow. If the camera still fails, the session connects anyway and the plan still syncs, so show the plan panel and screen share. |
 | Echo or feedback | Keep both mics muted. They start muted. |

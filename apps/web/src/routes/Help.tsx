@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { addDays } from "@vbn/shared";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../components/Common";
 import { IconArrowRight, IconCheck, IconExternal, IconShield, IconX } from "../components/Icons";
 import { LINKS, PRODUCT_NAME } from "../config";
-import { addShare, DEMO_ORGS, formatSlot, isExpired, loadShares, newCode, orgName, revokeShare, SHARE_DAYS, upcomingSlots } from "../lib/help";
+import { addShare, DEMO_ORGS, formatSlot, isExpired, loadShares, MEETING_LABEL, meetingOf, newCode, orgName, revokeShare, SHARE_DAYS, upcomingSlots, type MeetingType, type Share } from "../lib/help";
 import { useStoredState } from "../lib/storage";
 import { formatDateLong, toChatContext, useNavigatorData } from "../lib/useNavigator";
 
@@ -19,16 +19,75 @@ const NOT_SHARED = [
   "Your chat conversation with the Navigator",
 ];
 
+const MEETING_OPTIONS: { v: MeetingType; l: string; hint: string }[] = [
+  { v: "in-person", l: "In person", hint: "At the office. Show your plan on your screen; no video needed." },
+  { v: "video", l: "Video", hint: "Right here in the Navigator (demo)." },
+  { v: "phone", l: "Phone", hint: "Give the officer your code when you talk." },
+];
+
+const NEXT_STEP: Record<MeetingType, string> = {
+  "in-person": "When you meet, tell the service officer this code, then show your plan to look at it together.",
+  video: "Tell the service officer this code. Join the video session when it's time, or show your plan to look over it first.",
+  phone: "Tell the service officer this code when you talk. Show your plan so you both see the same thing.",
+};
+
+function ShareCard({ share: s, isNew, onStop }: { share: Share; isNew: boolean; onStop: () => void }) {
+  const meeting = meetingOf(s);
+  return (
+    <li id={`share-${s.code}`} tabIndex={-1} className={`card scroll-mt-28 p-5 outline-none ${isNew ? "ring-2 ring-ok" : ""}`}>
+      {isNew && (
+        <p role="status" className="mb-3 flex items-center gap-2 font-semibold text-ok">
+          <IconCheck size={20} /> Shared. {orgName(s.orgId)} can now see your plan summary.
+        </p>
+      )}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="font-sans text-lg font-bold text-navy-900">{orgName(s.orgId)}</p>
+          <p className="text-base text-muted">
+            {MEETING_LABEL[meeting]} · {s.slot ? formatSlot(s.slot) : "Now"}
+          </p>
+          <p className="text-sm text-muted">
+            {isExpired(s) ? "Expired" : `Access ends ${formatDateLong(s.expiresAt)}`}. Shared a snapshot from {formatDateLong(s.createdAt)}.
+          </p>
+        </div>
+        <div className="rounded-lg border-2 border-navy-800 bg-paper px-4 py-2 text-center">
+          <p className="text-sm font-semibold text-muted">Your code</p>
+          <p className="font-mono text-2xl font-bold tracking-wider text-navy-900">{s.code}</p>
+        </div>
+      </div>
+      <p className="mt-3 text-base">{NEXT_STEP[meeting]}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {meeting === "video" && (
+          <Link to="/session/$code" params={{ code: s.code }} className="btn btn-sm btn-primary">Join video session <IconArrowRight size={18} /></Link>
+        )}
+        <Link to="/plan/$code" params={{ code: s.code }} className={`btn btn-sm ${meeting === "video" ? "btn-outline" : "btn-primary"}`}>
+          Show my plan {meeting !== "video" && <IconArrowRight size={18} />}
+        </Link>
+        <button type="button" className="btn btn-sm btn-outline" onClick={onStop}>Stop sharing</button>
+      </div>
+    </li>
+  );
+}
+
 export function HelpPage() {
   useDocumentTitle(`Get help from a representative · ${PRODUCT_NAME}`);
   const data = useNavigatorData();
   useStoredState(); // re-render when shares change
   const [orgId, setOrgId] = useState<string>("");
+  const [meeting, setMeeting] = useState<MeetingType>("in-person");
   const [slot, setSlot] = useState<string>("now");
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<string | null>(null);
   const [slots] = useState(() => upcomingSlots().map((d) => d.toISOString()));
+
+  // The new share is listed at the top of the page, far from the button: take the person there.
+  useEffect(() => {
+    if (!created) return;
+    const el = document.getElementById(`share-${created}`);
+    el?.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    el?.focus({ preventScroll: true });
+  }, [created]);
 
   if (!data) return null;
   const shares = loadShares().filter((s) => !s.demo);
@@ -47,10 +106,12 @@ export function HelpPage() {
       createdAt: data.today,
       expiresAt: addDays(data.today, SHARE_DAYS),
       slot: slot === "now" ? null : slot,
+      meeting,
       plan: toChatContext(data),
     });
     setCreated(code);
     setConsent(false);
+    setOrgId("");
   };
 
   return (
@@ -77,30 +138,7 @@ export function HelpPage() {
           <h2 id="shares-heading" className="text-2xl text-navy-900">Your shared plans</h2>
           <ul className="mt-3 space-y-3">
             {shares.map((s) => (
-              <li key={s.code} className={`card p-5 ${created === s.code ? "ring-2 ring-ok" : ""}`}>
-                {created === s.code && (
-                  <p role="status" className="mb-2 flex items-center gap-2 font-semibold text-ok"><IconCheck size={20} /> Shared. {orgName(s.orgId)} can now see your plan summary.</p>
-                )}
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-sans text-lg font-bold text-navy-900">{orgName(s.orgId)}</p>
-                    <p className="text-base text-muted">
-                      {s.slot ? `Meeting ${formatSlot(s.slot)}` : "Live session, no appointment"} · Code <span className="font-mono font-semibold text-ink">{s.code}</span>
-                    </p>
-                    <p className="text-sm text-muted">
-                      {isExpired(s) ? "Expired" : `Access ends ${formatDateLong(s.expiresAt)}`}. Shared a snapshot from {formatDateLong(s.createdAt)}.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Link to="/session/$code" params={{ code: s.code }} className="btn btn-sm btn-primary">
-                      Join live session <IconArrowRight size={18} />
-                    </Link>
-                    <button type="button" className="btn btn-sm btn-outline" onClick={() => { revokeShare(s.code); if (created === s.code) setCreated(null); }}>
-                      Stop sharing
-                    </button>
-                  </div>
-                </div>
-              </li>
+              <ShareCard key={s.code} share={s} isNew={created === s.code} onStop={() => { revokeShare(s.code); if (created === s.code) setCreated(null); }} />
             ))}
           </ul>
         </section>
@@ -153,16 +191,30 @@ export function HelpPage() {
         </fieldset>
 
         <fieldset>
-          <legend className="field-label text-lg">3. When would you like to talk?</legend>
+          <legend className="field-label text-lg">3. How would you like to meet?</legend>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {MEETING_OPTIONS.map((o) => (
+              <label key={o.v} className={`flex min-h-12 cursor-pointer gap-3 rounded-lg border-2 bg-white px-3 py-2 has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-navy-800 ${meeting === o.v ? "border-navy-800 bg-navy-100" : "border-line hover:border-navy-600"}`}>
+                <input type="radio" name="meeting" value={o.v} checked={meeting === o.v} onChange={() => setMeeting(o.v)} className="mt-1 h-5 w-5 shrink-0 accent-navy-800" />
+                <span>
+                  <span className="block font-semibold">{o.l}</span>
+                  <span className="block text-sm text-muted">{o.hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend className="field-label text-lg">4. When?</legend>
           <div className="grid gap-2 sm:grid-cols-2">
-            {[{ v: "now", l: "Start a live session now (demo)" }, ...slots.map((s) => ({ v: s, l: formatSlot(s) }))].map((o) => (
+            {[{ v: "now", l: meeting === "video" ? "Now: start a video session (demo)" : meeting === "in-person" ? "Now: I'm at the office" : "Now" }, ...slots.map((s) => ({ v: s, l: formatSlot(s) }))].map((o) => (
               <label key={o.v} className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border-2 bg-white px-3 py-2 font-medium has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-navy-800 ${slot === o.v ? "border-navy-800 bg-navy-100" : "border-line hover:border-navy-600"}`}>
                 <input type="radio" name="slot" value={o.v} checked={slot === o.v} onChange={() => setSlot(o.v)} className="h-5 w-5 accent-navy-800" />
                 {o.l}
               </label>
             ))}
           </div>
-          <p className="mt-2 text-sm text-muted">Video sessions happen right here in the Navigator. You can also choose phone or in person with the organization.</p>
         </fieldset>
 
         {error && <p role="alert" className="rounded-lg bg-bad-bg px-3 py-2 font-semibold text-bad">{error}</p>}

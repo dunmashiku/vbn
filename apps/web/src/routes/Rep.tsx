@@ -1,26 +1,42 @@
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { labelFor, type ChatContext } from "@vbn/shared";
-import { useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { PrototypeBanner, SkipLink, useDocumentTitle, Wordmark } from "../components/Common";
 import { IconArrowRight, IconUsers } from "../components/Icons";
 import { PlanView, SecurityNote, SessionControls, SessionStatus, VideoTile } from "../components/Session";
 import { PRODUCT_NAME } from "../config";
-import { buildAgenda, demoShares, formatSlot, isExpired, loadShares, orgName, type Share } from "../lib/help";
+import { buildAgenda, DEMO_ORGS, demoShares, formatSlot, isExpired, loadShares, MEETING_LABEL, meetingOf, normalizeCode, orgName, type Share } from "../lib/help";
 import { useLiveSession } from "../lib/liveSession";
 import { useStoredState } from "../lib/storage";
 import { formatDate } from "../lib/useNavigator";
 
-function RepShell({ children }: { children: ReactNode }) {
+export const DEFAULT_REP_ORG = DEMO_ORGS[0]!.id;
+export const parseRepSearch = (q: Record<string, unknown>): { org?: string } =>
+  typeof q.org === "string" && DEMO_ORGS.some((o) => o.id === q.org) ? { org: q.org } : {};
+
+function RepShell({ orgId, children }: { orgId: string; children: ReactNode }) {
+  const navigate = useNavigate();
+  const selectId = useId();
   return (
     <>
       <SkipLink />
       <PrototypeBanner />
       <header className="on-dark border-b border-navy-800 bg-navy-900 text-paper">
         <div className="container-page flex flex-wrap items-center justify-between gap-3 py-3">
-          <Link to="/rep" aria-label="Service officer console home" className="rounded-md"><Wordmark dark /></Link>
-          <p className="flex items-center gap-2 text-base text-paper/90">
-            <IconUsers size={20} className="text-gold" /> Service officer console · Sample County Veterans Service Office (demo)
-          </p>
+          <Link to="/rep" search={{ org: orgId }} aria-label="Service officer console home" className="rounded-md"><Wordmark dark /></Link>
+          <div className="flex flex-wrap items-center gap-2 text-base text-paper/90">
+            <IconUsers size={20} className="text-gold" />
+            <span>Service officer console ·</span>
+            <label htmlFor={selectId} className="sr-only">Your organization (demo)</label>
+            <select
+              id={selectId}
+              value={orgId}
+              onChange={(e) => void navigate({ to: "/rep", search: { org: e.target.value } })}
+              className="min-h-11 rounded-md border border-paper/40 bg-navy-800 px-2 text-paper"
+            >
+              {DEMO_ORGS.map((o) => <option key={o.id} value={o.id}>{o.name} (demo)</option>)}
+            </select>
+          </div>
         </div>
       </header>
       <main id="main" tabIndex={-1} className="container-page py-8 outline-none">{children}</main>
@@ -28,9 +44,62 @@ function RepShell({ children }: { children: ReactNode }) {
   );
 }
 
-function useQueue(): Share[] {
+/** Every active share this browser knows about. In production this is a server lookup scoped to the officer's organization. */
+function useAllShares(): Share[] {
   useStoredState(); // live updates when the veteran tab shares or stops sharing
   return [...loadShares().filter((s) => !s.demo && !isExpired(s)), ...demoShares()];
+}
+
+const whenText = (s: Share) => `${MEETING_LABEL[meetingOf(s)]} · ${s.slot ? formatSlot(s.slot) : "Now"}`;
+
+/** The veteran tells the officer their code; the officer opens it. Only works for plans shared with this office. */
+function OpenByCode({ orgId, all, onOpen }: { orgId: string; all: Share[]; onOpen: (code: string) => void }) {
+  const [value, setValue] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!value.trim()) {
+      setMessage("Enter the code the veteran gives you, like BN-QBKH.");
+      return inputRef.current?.focus();
+    }
+    const code = normalizeCode(value);
+    const share = all.find((s) => s.code === code);
+    if (!share) {
+      setMessage(`No active shared plan has the code ${code}. Check it with the veteran. (Demo: their Navigator must be open in this same browser.)`);
+      return inputRef.current?.focus();
+    }
+    if (share.orgId !== orgId) {
+      setMessage(`${code} was shared with ${orgName(share.orgId)}, not your office. The veteran chooses who can see their plan.`);
+      return inputRef.current?.focus();
+    }
+    setMessage(null);
+    setValue("");
+    onOpen(code);
+  };
+  return (
+    <form noValidate onSubmit={submit} className="card p-4">
+      <label htmlFor={inputId} className="field-label">Open a case by code</label>
+      <div className="flex gap-2">
+        <input
+          id={inputId}
+          ref={inputRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="BN-QBKH"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          className="input font-mono uppercase"
+          aria-invalid={message ? true : undefined}
+          aria-describedby={message ? `${inputId}-msg` : undefined}
+        />
+        <button type="submit" className="btn btn-primary shrink-0">Open</button>
+      </div>
+      {message && <p id={`${inputId}-msg`} role="alert" className="mt-2 text-base font-semibold text-bad">{message}</p>}
+    </form>
+  );
 }
 
 const summary = (p: ChatContext) =>
@@ -54,17 +123,23 @@ function Agenda({ plan }: { plan: ChatContext }) {
   );
 }
 
-export function RepConsolePage() {
+export function RepConsolePage({ orgId = DEFAULT_REP_ORG }: { orgId?: string }) {
   useDocumentTitle(`Service officer console · ${PRODUCT_NAME}`);
-  const queue = useQueue();
+  const all = useAllShares();
+  const queue = all.filter((s) => s.orgId === orgId);
   const [selected, setSelected] = useState<string | null>(null);
   const current = queue.find((s) => s.code === selected) ?? queue[0] ?? null;
+  const caseHeadingRef = useRef<HTMLHeadingElement>(null);
+  const [opened, setOpened] = useState(0);
+  useEffect(() => {
+    if (opened) caseHeadingRef.current?.focus();
+  }, [opened]);
 
   return (
-    <RepShell>
+    <RepShell orgId={orgId}>
       <h1 className="text-4xl text-navy-900">Shared plans</h1>
       <p className="prose-measure mt-2 text-lg text-muted">
-        Veterans who chose your office and shared a read-only summary. Review before you meet; join a live session when they're ready.
+        Veterans who chose your office and shared a read-only summary. Review before you meet, or open a case with the code the veteran gives you.
       </p>
       <div className="mt-4">
         <SecurityNote>
@@ -74,7 +149,10 @@ export function RepConsolePage() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+        <div className="space-y-4">
+        <OpenByCode orgId={orgId} all={all} onOpen={(code) => { setSelected(code); setOpened((n) => n + 1); }} />
         <nav aria-label="Shared plans">
+          {queue.length === 0 && <p className="rounded-lg bg-paper-2 p-4 text-base text-muted">No plans shared with {orgName(orgId)} yet.</p>}
           <ul className="space-y-2">
             {queue.map((s) => {
               const active = current?.code === s.code;
@@ -93,7 +171,7 @@ export function RepConsolePage() {
                     </span>
                     <span className="mt-1 block text-base">{summary(s.plan)}</span>
                     <span className="mt-1 block text-sm text-muted">
-                      {s.slot ? formatSlot(s.slot) : "Wants to talk now"}
+                      {whenText(s)}
                       {overdue > 0 && <span className="font-semibold text-bad"> · {overdue} overdue</span>}
                     </span>
                   </button>
@@ -102,19 +180,28 @@ export function RepConsolePage() {
             })}
           </ul>
         </nav>
+        </div>
 
         {current && (
           <section aria-labelledby="case-heading" className="min-w-0 space-y-6">
             <div className="card flex flex-wrap items-center justify-between gap-4 p-5">
               <div>
-                <h2 id="case-heading" className="text-3xl text-navy-900">Case {current.code}</h2>
+                <h2 id="case-heading" ref={caseHeadingRef} tabIndex={-1} className="text-3xl text-navy-900 outline-none">Case {current.code}</h2>
                 <p className="text-base text-muted">
-                  Shared with {orgName(current.orgId)} · {current.slot ? `Meeting ${formatSlot(current.slot)}` : "Live session requested"} · Access ends {formatDate(current.expiresAt)}
+                  {whenText(current)} · Access ends {formatDate(current.expiresAt)}
                 </p>
               </div>
-              <Link to="/rep/session/$code" params={{ code: current.code }} className="btn btn-primary">
-                Join live session <IconArrowRight size={20} />
-              </Link>
+              {meetingOf(current) === "video" ? (
+                <Link to="/rep/session/$code" params={{ code: current.code }} className="btn btn-primary">
+                  Join video session <IconArrowRight size={20} />
+                </Link>
+              ) : (
+                <p className="max-w-xs text-base text-muted">
+                  {meetingOf(current) === "in-person"
+                    ? "Meeting in person: review this plan together. No video needed."
+                    : "Phone call: keep this plan open while you talk."}
+                </p>
+              )}
             </div>
             <div className="grid gap-6 xl:grid-cols-2">
               <div>
@@ -137,14 +224,13 @@ export function RepConsolePage() {
 export function RepSessionPage() {
   const { code } = useParams({ from: "/rep/session/$code" });
   useDocumentTitle(`Live session ${code} · Service officer console`);
-  const queue = useQueue();
-  const share = queue.find((s) => s.code === code);
+  const share = useAllShares().find((s) => s.code === code);
   const s = useLiveSession("rep", code, null);
   // Prefer the live plan from the session; fall back to the shared snapshot.
   const plan = s.remotePlan === undefined ? (share?.plan ?? null) : s.remotePlan;
 
   return (
-    <RepShell>
+    <RepShell orgId={share?.orgId ?? DEFAULT_REP_ORG}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="eyebrow">Live session · {code}</p>
@@ -162,7 +248,7 @@ export function RepSessionPage() {
           </div>
           <SessionControls s={s} />
           <SecurityNote>Encrypted peer to peer, not recorded. Never ask the veteran to show Social Security numbers, bank details or medical records on screen; collect those through your office's secure process.</SecurityNote>
-          {s.status === "ended" && <p><Link to="/rep" className="link">Back to shared plans</Link></p>}
+          {s.status === "ended" && <p><Link to="/rep" search={{ org: share?.orgId }} className="link">Back to shared plans</Link></p>}
           {plan && (
             <div>
               <h2 className="text-2xl text-navy-900">Agenda</h2>

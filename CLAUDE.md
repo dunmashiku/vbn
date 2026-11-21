@@ -23,9 +23,10 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 - The app never files, prepares or submits anything to the VA. Point to free VA-accredited representatives.
 - The Veterans Crisis Line (988 then press 1, text 838255, VeteransCrisisLine.net) stays visible in the footer and in the system prompt.
 
-## Representative help (`/help`, `/session/$code`, `/rep`, `/rep/session/$code`)
+## Representative help (`/help`, `/plan/$code`, `/session/$code`, `/rep`, `/rep/session/$code`)
 - A share is a read-only snapshot of the same summary the chat gets (`toChatContext`): never files, names, SSNs or bank details. It expires after `SHARE_DAYS` and can be revoked. It never appoints a representative or files anything.
 - Demo organizations and demo cases are fictional and labeled as such; never use real organization names or branding.
+- Each share has a meeting type: in person (the veteran shows `/plan/$code`, no video), video (live session) or phone. The officer opens a case with the veteran's code, and the console shows only plans shared with the selected organization.
 - Live sessions use `lib/liveSession.ts`: WebRTC with `BroadcastChannel` signaling, so both tabs must be in the same browser profile. The veteran makes the offer and owns the `plan` data channel. Mics start muted. Production swaps the transport for Amazon Chime SDK; keep the hook's interface stable.
 
 ## Grounded answers (RAG)

@@ -25,14 +25,23 @@ export interface Organization {
 
 /** Fictional organizations for the demo. Production pulls from the VA's accredited representative search. */
 export const DEMO_ORGS: Organization[] = [
-  { id: "sample-county", name: "Sample County Veterans Service Office", kind: "County veterans service office", details: "Video or in person · Free · Accredited service officers" },
-  { id: "harbor-point", name: "Harbor Point Veterans Association", kind: "Veterans service organization", details: "Video or phone · Free · Accredited service officers" },
-  { id: "lakeside", name: "Lakeside Veterans Help Center", kind: "Veterans service organization", details: "Video only · Free · Evening hours" },
+  { id: "sample-county", name: "Sample County Veterans Service Office", kind: "County veterans service office", details: "In person, video or phone · Free · Accredited service officers" },
+  { id: "harbor-point", name: "Harbor Point Veterans Association", kind: "Veterans service organization", details: "In person, video or phone · Free · Accredited service officers" },
+  { id: "lakeside", name: "Lakeside Veterans Help Center", kind: "Veterans service organization", details: "In person, video or phone · Free · Evening hours" },
 ];
 
 export const orgName = (id: string) => DEMO_ORGS.find((o) => o.id === id)?.name ?? "Demo organization";
 
 export const SHARE_DAYS = 14;
+
+/** How the veteran wants to meet. In person needs no video: they look at the plan together on the veteran's screen. */
+export const MEETING_TYPES = ["in-person", "video", "phone"] as const;
+export type MeetingType = (typeof MEETING_TYPES)[number];
+export const MEETING_LABEL: Record<MeetingType, string> = {
+  "in-person": "In person",
+  video: "Video",
+  phone: "Phone",
+};
 
 export const ShareSchema = z.object({
   code: z.string(),
@@ -42,6 +51,8 @@ export const ShareSchema = z.object({
   /** ISO date-time of the booked meeting, or null for "start now". */
   slot: z.string().nullable(),
   plan: ChatContextSchema,
+  /** Missing on shares made before meeting types existed; those were video. */
+  meeting: z.enum(MEETING_TYPES).optional(),
   demo: z.boolean().optional(),
 });
 export type Share = z.infer<typeof ShareSchema>;
@@ -51,6 +62,15 @@ export function loadShares(): Share[] {
     const r = ShareSchema.safeParse(s);
     return r.success ? [r.data] : [];
   });
+}
+
+export const meetingOf = (s: Share): MeetingType => s.meeting ?? "video";
+
+/** Accepts what people actually type: "bn-qbkh", "BN QBKH" or just "QBKH". */
+export function normalizeCode(input: string): string {
+  const raw = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const body = raw.startsWith("BN") && raw.length > 4 ? raw.slice(2) : raw;
+  return `BN-${body}`;
 }
 
 export function addShare(share: Share) {
@@ -155,6 +175,7 @@ export function demoShares(): Share[] {
       createdAt: addDays(today, -2),
       expiresAt: addDays(today, SHARE_DAYS - 2),
       slot: at(0),
+      meeting: "in-person",
       demo: true,
       plan: demoPlan(
         { branch: "navy", separationType: "separation", separationDate: addDays(today, 150), maritalStatus: "single", priorDivorce: false, hasDependents: false, serviceConnected: "yes", state: "VA" },
@@ -168,11 +189,26 @@ export function demoShares(): Share[] {
       createdAt: addDays(today, -1),
       expiresAt: addDays(today, SHARE_DAYS - 1),
       slot: at(3),
+      meeting: "video",
       demo: true,
       plan: demoPlan(
         { branch: "air-force", separationType: "retirement", separationDate: addDays(today, 400), maritalStatus: "married", priorDivorce: true, hasDependents: true, serviceConnected: "no", state: "TX" },
         { orders: "ready", "marriage-certificate": "ready" },
         [],
+      ),
+    },
+    {
+      code: "BN-DEMO3",
+      orgId: "harbor-point",
+      createdAt: addDays(today, -3),
+      expiresAt: addDays(today, SHARE_DAYS - 3),
+      slot: at(1),
+      meeting: "phone",
+      demo: true,
+      plan: demoPlan(
+        { branch: "marine-corps", separationType: "separation", separationDate: addDays(today, 60), maritalStatus: "married", priorDivorce: false, hasDependents: true, serviceConnected: "not-sure", state: "NC" },
+        { dd214: "ready" },
+        ["tap", "education"],
       ),
     },
   ];

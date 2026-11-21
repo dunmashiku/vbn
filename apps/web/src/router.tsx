@@ -5,9 +5,10 @@ import { loadIntake } from "./lib/storage";
 import { AppLayout } from "./routes/AppLayout";
 import { DocumentsPage } from "./routes/Documents";
 import { HelpPage } from "./routes/Help";
-import { RepConsolePage, RepSessionPage } from "./routes/Rep";
+import { parseRepSearch, RepConsolePage, RepSessionPage } from "./routes/Rep";
 import { VeteranSessionPage } from "./routes/VeteranSession";
 import { LandingPage } from "./routes/Landing";
+import { SharedPlanPage } from "./routes/SharedPlan";
 import { OfficerSignInPage, parseMode, VeteranSignInPage } from "./routes/SignIn";
 import { StartPage } from "./routes/Start";
 import { TimelinePage } from "./routes/Timeline";
@@ -87,8 +88,26 @@ const veteranSessionRoute = createRoute({
   },
 });
 
+// In-person meeting: the veteran shows their plan on their own screen (no video).
+const sharedPlanRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/plan/$code",
+  component: SharedPlanPage,
+  beforeLoad: () => {
+    if (!loadIntake()) throw redirect({ to: "/start" });
+  },
+});
+
 // Service officer side (demo sign-in at /signin/officer is optional; production requires accredited staff accounts).
-const repRoute = createRoute({ getParentRoute: () => rootRoute, path: "/rep", component: RepConsolePage });
+const repRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/rep",
+  validateSearch: parseRepSearch,
+  component: function RepConsole() {
+    const { org } = repRoute.useSearch();
+    return <RepConsolePage key={org ?? "default"} orgId={org} />;
+  },
+});
 const repSessionRoute = createRoute({ getParentRoute: () => rootRoute, path: "/rep/session/$code", component: RepSessionPage });
 
 const routeTree = rootRoute.addChildren([
@@ -99,6 +118,7 @@ const routeTree = rootRoute.addChildren([
   officerSignInRoute,
   appRoute.addChildren([timelineRoute, documentsRoute, helpRoute]),
   veteranSessionRoute,
+  sharedPlanRoute,
   repRoute,
   repSessionRoute,
 ]);

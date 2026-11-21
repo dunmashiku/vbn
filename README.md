@@ -70,11 +70,15 @@ Without an Anthropic key everything works except the chat, which shows a clear "
 
 ### Representative help flow (about 3 minutes, use Chrome)
 
-1. As the veteran, open **Get help**. Choose **Sample County Veterans Service Office** (all organizations are fictional), review what is and isn't shared, agree, pick **Start a live session now**, and click **Share my plan**.
-2. Open http://localhost:5173/rep in a **second tab** of the same browser window. This is the service officer console: the new case appears at the top (no name, just a code), with a suggested first-meeting agenda built from the plan.
-3. In the console, click **Join live session**. In the veteran tab, click **Join live session** on the shared plan. Allow camera access in both tabs.
-4. The two tabs connect with real video. Both mics start muted to avoid echo on one laptop. Show **Share a tab or screen**, then uncheck **Show my plan during this session** in the veteran tab and watch the officer's view change to "Hidden".
-5. Click **End session**. Back on Get help, **Stop sharing** removes the case from the officer's queue.
+1. As the veteran, open **Get help**. Choose **Sample County Veterans Service Office** (all organizations are fictional), review what is and isn't shared, agree, choose **In person** and **Now**, and click **Share my plan**. The page shows a code such as `BN-M3HT`.
+2. Open http://localhost:5173/rep in a **second tab** of the same browser window. This is the service officer console for the organization picked at the top. Type the code into **Open a case by code**: the case opens with a suggested first-meeting agenda built from the plan. Plans shared with another organization don't appear, and their codes won't open.
+3. In the veteran tab, **Show my plan** opens a large read-only view of exactly what the officer sees: to look at together in the room, or to follow along on a phone call. No video needed.
+
+For remote help, share with **Video** instead:
+
+1. In the console, click **Join video session**. In the veteran tab, click **Join video session** on the shared plan. Allow camera access in both tabs.
+2. The two tabs connect with real video. Both mics start muted to avoid echo on one laptop. Show **Share a tab or screen**, then uncheck **Show my plan during this session** in the veteran tab and watch the officer's view change to "Hidden".
+3. Click **End session**. Back on Get help, **Stop sharing** removes the case from the officer's queue.
 
 Two tabs only connect in the same browser profile (they talk over a `BroadcastChannel`). The Claude desktop app's browser pane blocks camera access, so demo this in Chrome.
 

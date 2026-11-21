@@ -106,7 +106,8 @@ Real medical records (service treatment records, private records) are health inf
 
 **Demo (built).**
 - *Share:* the veteran picks an organization and agrees to share a read-only summary: intake answers, milestone dates and statuses, and document names and statuses. Files, Social Security numbers, bank details and chat history are never shared. Shares end after 14 days or when the veteran clicks Stop sharing. Sharing doesn't appoint anyone or file anything.
-- *Service officer console (`/rep`):* a queue identified by case code, not name, plus a suggested first-meeting agenda generated from the plan (overdue items, the BDD window, missing documents, appointing the organization).
+- *Meeting type:* in person, video or phone. In person needs no video: the veteran shows a large read-only plan (`/plan/$code`) on their own screen, and the officer opens the same plan with the code. Every meeting type offers that view, so on a phone call both people look at the same plan.
+- *Service officer console (`/rep`):* a queue for one organization at a time, identified by case code, not name; an "open a case by code" box that refuses plans shared with another organization; and a suggested first-meeting agenda generated from the plan (overdue items, the BDD window, missing documents, appointing the organization). In production the code is looked up on the server, scoped to the officer's organization, so it also works across devices.
 - *Live session:* browser WebRTC between two tabs, with signaling over `BroadcastChannel`, so no server is involved. Media is always encrypted (DTLS-SRTP). The veteran's plan travels over a WebRTC data channel and updates live; the veteran can hide it at any time. Screen sharing nudges people toward sharing a single tab. Nothing is recorded.
 
 **Production**
