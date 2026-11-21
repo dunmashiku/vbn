@@ -29,6 +29,9 @@ interface ChatApi {
   error: string | null;
   open: boolean;
   setOpen: (o: boolean) => void;
+  /** Wide screens only: the pane is folded into a narrow side tab. Remembered in this browser. */
+  collapsed: boolean;
+  setCollapsed: (c: boolean) => void;
   ask: (text: string, opts?: { sampleDocument?: { title: string; text: string }; display?: string }) => void;
   reset: () => void;
 }
@@ -43,11 +46,29 @@ export function useChat(): ChatApi {
 
 let nextId = 1;
 
+const COLLAPSED_KEY = "bn.ui.chatCollapsed";
+function readCollapsed(): boolean {
+  try {
+    return localStorage.getItem(COLLAPSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function ChatProvider({ children }: { children: ReactNode }) {
   const data = useNavigatorData();
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsedState] = useState(readCollapsed);
+  const setCollapsed = useCallback((c: boolean) => {
+    setCollapsedState(c);
+    try {
+      localStorage.setItem(COLLAPSED_KEY, c ? "1" : "0");
+    } catch {
+      /* the choice just isn't remembered */
+    }
+  }, []);
   const abortRef = useRef<AbortController | null>(null);
 
   const mutation = useMutation({
@@ -87,9 +108,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       const history = [...messages.filter((m) => m.content), userMsg];
       setMessages([...history, reply]);
       setOpen(true);
+      setCollapsed(false);
       mutation.mutate({ history, sampleDocument: opts?.sampleDocument, replyId: reply.id });
     },
-    [messages, mutation],
+    [messages, mutation, setCollapsed],
   );
 
   const reset = useCallback(() => {
@@ -101,14 +123,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   useEffect(() => () => abortRef.current?.abort(), []);
 
   const api = useMemo<ChatApi>(
-    () => ({ messages, pending: mutation.isPending, error, open, setOpen, ask, reset }),
-    [messages, mutation.isPending, error, open, ask, reset],
+    () => ({ messages, pending: mutation.isPending, error, open, setOpen, collapsed, setCollapsed, ask, reset }),
+    [messages, mutation.isPending, error, open, collapsed, setCollapsed, ask, reset],
   );
   return <ChatCtx.Provider value={api}>{children}</ChatCtx.Provider>;
 }
 
 export function ChatPanel() {
-  const { messages, pending, error, open, setOpen, ask } = useChat();
+  const { messages, pending, error, open, setOpen, collapsed, setCollapsed, ask } = useChat();
+  const showRef = useRef<HTMLButtonElement>(null);
+  const hideRef = useRef<HTMLButtonElement>(null);
   const [draft, setDraft] = useState("");
   const [warning, setWarning] = useState<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
@@ -170,10 +194,28 @@ export function ChatPanel() {
         {open ? <IconX size={20} /> : <IconChat size={20} />} {open ? "Close chat" : "Ask the Navigator"}
       </button>
 
+      {/* Wide screens: the folded side tab */}
+      {collapsed && (
+        <button
+          ref={showRef}
+          type="button"
+          className="sticky top-[4.5rem] hidden h-56 w-12 flex-col items-center justify-start gap-3 rounded-xl border border-line bg-navy-900 py-4 text-paper on-dark hover:bg-navy-800 xl:flex"
+          aria-expanded={false}
+          aria-controls={panelId}
+          onClick={() => {
+            setCollapsed(false);
+            setTimeout(() => hideRef.current?.focus(), 50);
+          }}
+        >
+          <IconChat size={20} />
+          <span className="font-semibold [writing-mode:vertical-rl]">Ask the Navigator</span>
+        </button>
+      )}
+
       <aside
         id={panelId}
         aria-labelledby="chat-heading"
-        className={`${open ? "fixed inset-0 z-50 flex" : "hidden"} flex-col bg-white xl:sticky xl:top-[4.5rem] xl:z-auto xl:flex xl:h-[calc(100vh-5.5rem)] xl:rounded-xl xl:border xl:border-line`}
+        className={`${open ? "fixed inset-0 z-50 flex" : "hidden"} flex-col bg-white xl:sticky xl:top-[4.5rem] xl:z-auto ${collapsed ? "xl:hidden" : "xl:flex"} xl:h-[calc(100vh-5.5rem)] xl:rounded-xl xl:border xl:border-line`}
       >
         <div className="flex items-start justify-between gap-3 border-b border-line bg-navy-900 px-4 py-3 text-paper on-dark xl:rounded-t-xl">
           <div>
@@ -184,6 +226,19 @@ export function ChatPanel() {
           </div>
           <button type="button" className="btn btn-sm btn-outline xl:hidden" onClick={() => setOpen(false)}>
             <IconX size={18} /> Close
+          </button>
+          <button
+            ref={hideRef}
+            type="button"
+            className="btn btn-sm btn-outline hidden xl:inline-flex"
+            aria-expanded={true}
+            aria-controls={panelId}
+            onClick={() => {
+              setCollapsed(true);
+              setTimeout(() => showRef.current?.focus(), 50);
+            }}
+          >
+            Hide chat
           </button>
         </div>
 

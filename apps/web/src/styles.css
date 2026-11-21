@@ -178,3 +178,9 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Printing the 21-526EZ prep sheet: only the sheet itself. */
+@media print {
+  header, footer, aside, .print-hide, [aria-controls="navigator-chat"] { display: none !important; }
+  body { background: #fff; }
+}

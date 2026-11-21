@@ -4,6 +4,7 @@ import { PRODUCT_NAME } from "./config";
 import { loadIntake } from "./lib/storage";
 import { AppLayout } from "./routes/AppLayout";
 import { DocumentsPage } from "./routes/Documents";
+import { FormPrepPage, FormsListPage } from "./routes/FormPrep";
 import { HelpPage } from "./routes/Help";
 import { parseRepSearch, RepConsolePage, RepSessionPage } from "./routes/Rep";
 import { VeteranSessionPage } from "./routes/VeteranSession";
@@ -76,6 +77,16 @@ const appRoute = createRoute({
 });
 const timelineRoute = createRoute({ getParentRoute: () => appRoute, path: "/timeline", component: TimelinePage });
 const documentsRoute = createRoute({ getParentRoute: () => appRoute, path: "/documents", component: DocumentsPage });
+// 21-526EZ prep guide: answers stay in the browser; nothing is filled in or submitted.
+const formsListRoute = createRoute({ getParentRoute: () => appRoute, path: "/forms", component: FormsListPage });
+const formPrepRoute = createRoute({ getParentRoute: () => appRoute, path: "/forms/$formId", component: FormPrepPage });
+const formPrepShortRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/forms/526ez",
+  beforeLoad: () => {
+    throw redirect({ to: "/forms/$formId", params: { formId: "21-526ez" } });
+  },
+});
 const helpRoute = createRoute({ getParentRoute: () => appRoute, path: "/help", component: HelpPage });
 
 // Live session for the veteran: full-width, outside the app layout (no chat panel).
@@ -116,7 +127,7 @@ const routeTree = rootRoute.addChildren([
   signInRoute,
   veteranSignInRoute,
   officerSignInRoute,
-  appRoute.addChildren([timelineRoute, documentsRoute, helpRoute]),
+  appRoute.addChildren([timelineRoute, documentsRoute, formsListRoute, formPrepShortRoute, formPrepRoute, helpRoute]),
   veteranSessionRoute,
   sharedPlanRoute,
   repRoute,

@@ -36,11 +36,12 @@
 | 3 | Intake | 1 min | `/start` |
 | 4 | Personal timeline | 3 min | My timeline |
 | 5 | Documents | 2 min | My documents |
-| 6 | Ask the Navigator, including a live VA lookup | 4 min | Chat panel |
-| 7 | Getting free, accredited help | 4 min | Get help + officer console |
-| 8 | Privacy | 1 min | Clear my data |
-| 9 | Path to production | 2 min | Talking points |
-| 10 | The ask | open | Discussion |
+| 6 | Preparing forms | 3 min | Forms |
+| 7 | Ask the Navigator, including a live VA lookup | 4 min | Chat panel |
+| 8 | Getting free, accredited help | 4 min | Get help + officer console |
+| 9 | Privacy | 1 min | Clear my data |
+| 10 | Path to production | 2 min | Talking points |
+| 11 | The ask | open | Discussion |
 
 ---
 
@@ -131,7 +132,36 @@ Optionally click **Save to a free account**. The sign-up page also mentions conn
 
 > "The Navigator organizes. It never submits anything. The veteran uploads to VA.gov or hands documents to their representative."
 
-## 6. Ask the Navigator (4 min)
+## 6. Preparing forms (3 min)
+
+Best on a wide screen (1440px or more). If the chat crowds the page, click **Hide chat**: the chat folds into a narrow "Ask the Navigator" tab on the right edge.
+
+**Do:** click **Forms**.
+
+> "Veterans tell us the paperwork is the hard part. So for the forms people need most, we walk through each question in plain words. We start with the disability claim, VA Form 21-526EZ, and also have the Intent to File, the health care application and the mental health statement."
+
+**Do:** click **Start** on **VA Form 21-526EZ**.
+- Point out the top note: the Navigator never fills in or submits the form, the chat never sees the answers, and the SSN, date of birth and bank details are never typed here.
+- Point out **Saved automatically in this browser**:
+  > "Nothing's lost if you close the tab. You come back and pick up where you left off."
+
+**Do:** in **Step 5 · Your conditions**, click into the first box. The official page on the right jumps to **page 11** and highlights **Item 16**.
+
+> "This is the real VA form, January 2026 version. As you move through the questions, it shows exactly where each answer goes, so there are no surprises at the end. We never write on the official form."
+
+**Do:** type `SAMPLE: Hearing loss · noise from heavy equipment · July 2019`. Then click **Ask the Navigator about this**.
+
+> "The chat explains what the question is looking for. It gets the question, never your answer."
+
+**Do:** click a dropdown in **Step 7 · Service pay**. The preview moves to **page 12**.
+
+**Do:** scroll to **My prep sheet** and click **Print my prep sheet**. Cancel the print dialog.
+
+> "The veteran prints this and copies it into VA.gov, or goes over it with a free accredited representative. That's the hand-off: the representative still owns the claim."
+
+**Optional:** type `123-45-6789` into any box. It's removed with a warning.
+
+## 7. Ask the Navigator (4 min)
 
 **Do:** in the chat panel, click **"Which documents am I still missing?"**
 
@@ -158,7 +188,7 @@ Expect three offices with distance, address and phone: the pre-discharge sites a
 - Type `My SSN is 000-00-0000` and press Enter. The message is blocked before it's sent.
   > "It won't even send something that looks like a Social Security or account number."
 
-## 7. Getting free, accredited help (4 min)
+## 8. Getting free, accredited help (4 min)
 
 > "Here's what we think matters most for organizations like yours: getting someone to a free accredited representative, prepared."
 
@@ -196,13 +226,13 @@ Both tabs must be in the **same Chrome window** at `localhost:5173`. In this dem
 
 If asked about HIPAA, see the questions section below.
 
-## 8. Privacy (1 min)
+## 9. Privacy (1 min)
 
 **Do:** in tab 1, go to My timeline and click **Clear my data**, then confirm.
 
-> "Everything is gone: answers, progress and documents. In this preview, nothing lives on our servers. No accounts, no tracking, no cookies."
+> "Everything is gone: answers, progress, form prep answers and documents. In this preview, nothing lives on our servers. No accounts, no tracking, no cookies."
 
-## 9. Path to production (2 min)
+## 10. Path to production (2 min)
 
 Talking points (details in `docs/architecture.md`):
 - Built to move to AWS without a rewrite: the website behind CloudFront and a web firewall, the chat on API Gateway and Lambda, and Claude through Amazon Bedrock so data stays in our AWS account.
@@ -213,7 +243,7 @@ Talking points (details in `docs/architecture.md`):
 - VA lookups move from the VA's test system to production once the VA approves us. That takes a production access request and a demo to the VA, and the VA currently warns of long delays for benefits APIs, so we'd apply early. On AWS the same connection runs through Bedrock AgentCore, with the VA keys in Secrets Manager.
 - Every deadline and document rule is marked for review against VA.gov before launch.
 
-## 10. The ask (discussion)
+## 11. The ask (discussion)
 
 Pick the questions that fit the room:
 1. Would your service officers use a shared plan and agenda like this? What's missing for them?
@@ -221,6 +251,7 @@ Pick the questions that fit the room:
 3. Which organizations should we talk to next: county offices, VSOs, transition offices, churches, nonprofits?
 4. Who can review our deadline and document rules for accuracy?
 5. Do your officers prefer video in the Navigator, or their own tools (phone, Zoom, in person)?
+7. Which forms should the form prep cover next, and would your representatives use a veteran's prep sheet? Should an attorney or a VSO partner review it before a pilot?
 6. Do the short document names on the timeline make sense to you: "DD-214", "Service treatment records", "Birth or adoption certificates", "Social Security numbers", "Direct deposit details"? What would you call them? (Ask Edwin directly; the names live in `packages/shared/documents.ts` as `shortName`.)
 
 ---
@@ -232,6 +263,9 @@ No. We're not affiliated with the VA or the Department of Defense. We point peop
 
 **"Does it file claims?"**
 No, never. Accredited representatives file through the VA's own systems once the veteran appoints them. We get people to them prepared.
+
+**"Doesn't it fill out forms?"**
+No. It explains each question in plain words, shows where it is on the official form, and saves the veteran's own notes in their browser. The veteran copies them into VA.gov or goes over them with a free accredited representative. Federal law limits who may help prepare and present VA claims, so we keep the representative in charge and plan a legal review before any pilot.
 
 **"Is it HIPAA compliant?"**
 "There's no such thing as 'HIPAA approved'; the government doesn't certify products. HIPAA applies to health care providers, health plans, and the companies that handle health records for them under a Business Associate Agreement. Most service organizations aren't covered, but we're building to that standard anyway. In production, anything touching medical records runs on HIPAA-eligible AWS services under a BAA, and video uses Chime SDK under the same agreement."
