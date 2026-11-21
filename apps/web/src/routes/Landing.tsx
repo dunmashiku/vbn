@@ -57,6 +57,9 @@ function Header() {
           </ul>
         </nav>
         <div className="flex items-center gap-2">
+          <Link to="/signin" className={`btn btn-outline ${scrolled ? "btn-sm" : ""} hidden sm:inline-flex`}>
+            Sign in
+          </Link>
           <Link to="/start" className={`btn btn-primary ${scrolled ? "btn-sm" : ""} hidden sm:inline-flex`}>
             Build my timeline
           </Link>
@@ -82,8 +85,9 @@ function Header() {
                 </a>
               </li>
             ))}
-            <li className="pt-2 sm:hidden">
+            <li className="grid gap-2 pt-2 sm:hidden">
               <Link to="/start" className="btn btn-primary w-full">Build my timeline</Link>
+              <Link to="/signin" className="btn btn-outline w-full">Sign in</Link>
             </li>
           </ul>
         </nav>
@@ -112,7 +116,10 @@ function Hero() {
             </Link>
             <a href="#how-it-works" className="btn btn-outline">See how it works</a>
           </div>
-          <p className="mt-4 text-base text-paper/80">Takes about a minute. No account needed.</p>
+          <p className="mt-4 text-base text-paper/80">
+            Takes about a minute. No account needed, or{" "}
+            <Link to="/signin/veteran" search={{ mode: "signup" }} className="link">create a free account</Link> to use it on any device.
+          </p>
         </div>
         <div className="fade-in [animation-delay:150ms]">
           <TimelineMock />
@@ -317,7 +324,10 @@ function ForOrganizations() {
             </p>
           }
         />
-        <a href={CONTACT_MAILTO} className="btn btn-primary justify-self-start">Talk with us</a>
+        <div className="flex flex-col gap-3 justify-self-start">
+          <a href={CONTACT_MAILTO} className="btn btn-primary">Talk with us</a>
+          <Link to="/signin/officer" className="btn btn-outline">Service officer sign in</Link>
+        </div>
       </div>
     </section>
   );

@@ -16,6 +16,7 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 
 ## Privacy and safety (non-negotiable)
 - No database, accounts, analytics or cookies in the demo. Intake and progress in `localStorage`, files in IndexedDB; "Clear my data" erases both.
+- Sign-in and sign-up (`routes/SignIn.tsx`) are demo screens only: they never store or send what's typed and never gate a page. Keep "Continue without an account".
 - Uploaded files never leave the browser. Only built-in SAMPLE document text may be sent to chat ("Explain this document").
 - SSNs and bank details are `have-ready` reminders only: never uploaded, typed or stored. The chat input blocks SSN- and account-number-shaped text.
 - The chat server never logs message contents; validate every request with the shared Zod schemas and keep the length/history caps.

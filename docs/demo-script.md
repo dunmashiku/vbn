@@ -10,8 +10,9 @@
 
 - [ ] Pull the latest `main` and run `make setup`.
 - [ ] Put the Anthropic API key in `services/chat/.env`, then run `make check-key`.
+- [ ] Check the VA sandbox keys in `services/va-mcp/.env` with `make test-va-live`. Two read-only tests should pass; the upload test is skipped.
 - [ ] Run `make dev`, open http://localhost:5173 in **Chrome**, and do one full run-through of this script.
-- [ ] Ask the Navigator one question so you know the key works and roughly how fast replies come back.
+- [ ] Ask the Navigator one question so you know the key works and roughly how fast replies come back. Then ask "Where's the nearest VA benefits office to Annapolis?" and check it shows "Looking up VA locations" and lists offices.
 - [ ] Run the live session once with your real camera, and allow camera access for `localhost` permanently so the prompt doesn't appear mid-demo.
 
 ## 15 minutes before
@@ -19,7 +20,7 @@
 - [ ] Run `make dev` (or `make stop` first if a port is busy), then `make health`. It should report `"configured":true`.
 - [ ] In Chrome, open **one window with two tabs**:
   - Tab 1: http://localhost:5173 (the veteran)
-  - Tab 2: http://localhost:5173/rep (the service officer)
+  - Tab 2: http://localhost:5173/signin/officer (the service officer)
 - [ ] In tab 1, if there's leftover data from a rehearsal, go to My timeline and click **Clear my data**, then return to the landing page.
 - [ ] Zoom Chrome to 110–125% so the room can read it. Turn on Do Not Disturb. Close other tabs, email and anything personal.
 - [ ] Have this script on a second screen or printed.
@@ -35,7 +36,7 @@
 | 3 | Intake | 1 min | `/start` |
 | 4 | Personal timeline | 3 min | My timeline |
 | 5 | Documents | 2 min | My documents |
-| 6 | Ask the Navigator | 3 min | Chat panel |
+| 6 | Ask the Navigator, including a live VA lookup | 4 min | Chat panel |
 | 7 | Getting free, accredited help | 4 min | Get help + `/rep` |
 | 8 | Privacy | 1 min | Clear my data |
 | 9 | Path to production | 2 min | Talking points |
@@ -61,7 +62,11 @@ Point out:
 - **What's covered:** disability, health coverage, Survivor Benefit Plan, life insurance, GI Bill, DD-214, state benefits.
 - **Free, accredited help:**
   > "This matters to us: filing a VA claim is free. We never charge, and we never file for anyone. We connect people to free accredited representatives, and we warn them about claim sharks."
-- **Privacy**, **For organizations**, the **FAQ** ("Is this the VA?" No, said plainly), and the **Veterans Crisis Line** in the footer.
+- **Sign in** (top right): click it briefly to show the two doors, one for veterans and one for service officers. Veterans would use their VA.gov sign-in (Login.gov or ID.me) or an email link, and can always skip the account:
+  > "No account is needed to get value. An account is only for picking up on another device or sharing with a representative. These are demo screens; nothing is saved."
+
+  Click **Back to home**.
+- **Privacy**, **For organizations** (it has a **Service officer sign in** button), the **FAQ** ("Is this the VA?" No, said plainly), and the **Veterans Crisis Line** in the footer.
 
 > "No stock photos, no VA logos or military seals. We're not affiliated and we don't pretend to be."
 
@@ -113,7 +118,7 @@ Walk through:
 
 > "The Navigator organizes. It never submits anything. The veteran uploads to VA.gov or hands documents to their representative."
 
-## 6. Ask the Navigator (3 min)
+## 6. Ask the Navigator (4 min)
 
 **Do:** in the chat panel, click **"Which documents am I still missing?"**
 
@@ -125,9 +130,18 @@ Expect it to name the **service treatment records** and point to the official so
 
 > "It doesn't answer from memory. Every answer comes from short notes we wrote from the official VA, TRICARE and Defense pages, and it links the pages it used. If those pages don't cover a question, it says it isn't sure and points you to the official source."
 
+**Do:** click **"Where's the nearest VA benefits office?"** or type **"Where's the nearest VA benefits office to Annapolis?"** You'll see "Looking up VA locations" while it works.
+
+> "This one isn't from our notes. The Navigator just asked the VA's own facilities system. It's the VA's test system for now, which is open to any developer."
+
+Expect three offices with distance, address and phone: the pre-discharge sites at the Naval Academy and Fort Meade, and the Baltimore VA Regional Benefit Office. It reminds people to call ahead and links VA.gov.
+- The test data lists the two pre-discharge sites as **closed**, and the answer says so. If anyone asks: "That's the VA's test data. Production uses the live system."
+- It may also mention the Maryland Department of Veterans and Military Families in Annapolis. That comes from our official-source notes, not the VA lookup.
+
+> "Production uses the same connection with the VA's approval. It only looks things up. The Navigator can't upload or file anything with the VA."
+
 **Optional, pick one:**
 - On the sample DD-214, click **Explain this document**. "In production this could check a real DD-214 against the person's answers. In the demo, only fake sample text is ever sent."
-- Ask **"Where's the nearest VA benefits office to Annapolis?"** It looks up VA locations live from the VA's test system and lists address and phone, with a reminder to call ahead. Needs the VA sandbox key in `services/va-mcp/.env`.
 - Type `My SSN is 000-00-0000` and press Enter. The message is blocked before it's sent.
   > "It won't even send something that looks like a Social Security or account number."
 
@@ -142,11 +156,15 @@ Expect it to name the **service treatment records** and point to the official so
    > "Files, Social Security numbers and bank details are never shared. Access ends after 14 days, and they can stop sharing at any time. Sharing doesn't appoint anyone or file anything."
 4. Tick the agreement box, pick **Start a live session now**, and click **Share my plan**.
 
-**Service officer side (tab 2, `/rep`):**
-1. The new case is at the top, identified by a code, not a name.
-2. Show the **suggested first-meeting agenda**: the overdue step, the claim window, the missing documents, and appointing the organization on VA Form 21-22.
+**Service officer side (tab 2, `/signin/officer`):**
+1. Click **Fill in the demo officer**, then **Continue**. On the accreditation step:
+   > "Only accredited officers get in. In production we check their accreditation number against the VA's list, and their organization approves them."
+
+   Click **Verify and sign in**, then **Open the service officer console**.
+2. The new case is at the top, identified by a code, not a name.
+3. Show the **suggested first-meeting agenda**: the overdue step, the claim window, the missing documents, and appointing the organization on VA Form 21-22.
    > "Instead of spending the first half hour rebuilding someone's situation, the officer starts here."
-3. Click **Join live session**.
+4. Click **Join live session**.
 
 **Back in tab 1:** click **Join live session** on the shared plan.
 - The tabs connect with live video. Both mics start muted, which avoids echo on one laptop.
@@ -171,6 +189,7 @@ Talking points (details in `docs/architecture.md`):
 - Real accounts for veterans and for accredited staff, with access only while a share is active, and every view logged.
 - Real document uploads go to encrypted storage and are scanned for malware before use. Real medical records require a HIPAA Business Associate Agreement and HIPAA-eligible services only.
 - Video moves to Amazon Chime SDK, which is covered by the AWS BAA.
+- VA lookups move from the VA's test system to production once the VA approves us. That takes a production access request and a demo to the VA, and the VA currently warns of long delays for benefits APIs, so we'd apply early. On AWS the same connection runs through Bedrock AgentCore, with the VA keys in Secrets Manager.
 - Every deadline and document rule is marked for review against VA.gov before launch.
 
 ## 10. The ask (discussion)
@@ -198,6 +217,12 @@ No, never. Accredited representatives file through the VA's own systems once the
 **"Where does the data go?"**
 In this preview it stays in the browser. The chat sends the question plus a summary of the answers and checklist to generate a reply. It never sends files, and the server doesn't log messages.
 
+**"Is the VA location data real?"**
+It comes from the VA's own facilities system, but the demo uses the VA's test version, which can be out of date. That's why it says to call ahead and links VA.gov. Production would use the live system after the VA approves our access.
+
+**"Does it connect to the VA for claims?"**
+No. It only looks up locations. We tested the VA's document upload system with fake sample files for developers, but the Navigator itself can't upload or file anything.
+
 **"How accurate are the dates?"**
 They come from general rules that we've marked for review against VA.gov before launch. Every step links to the official source, and the timeline tells people to confirm with their representative.
 
@@ -214,6 +239,7 @@ People have questions at 10 p.m. that don't need a meeting. The assistant answer
 | Problem | What to do |
 |---|---|
 | Chat says the API key is missing | Check `services/chat/.env`, restart `make dev`, and run `make health`. Meanwhile keep going; the rest of the app works without it. |
+| VA lookup gives no offices, or just links VA.gov | The VA test system may be down or the key missing. The chat falls back to the VA.gov locator on its own, so keep going: "When the VA's system doesn't answer, it sends people to VA.gov instead of guessing." Afterwards, run `make test-va-live`. |
 | Chat is slow | Keep talking about the timeline. Replies stream in as they arrive. |
 | No internet | Everything except the chat works offline. Skip section 6 and describe it. |
 | Live session stuck on "Waiting…" | Both tabs must be in the **same Chrome window**. Reload the officer tab, then click Join again in the veteran tab. |

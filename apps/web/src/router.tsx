@@ -8,6 +8,7 @@ import { HelpPage } from "./routes/Help";
 import { RepConsolePage, RepSessionPage } from "./routes/Rep";
 import { VeteranSessionPage } from "./routes/VeteranSession";
 import { LandingPage } from "./routes/Landing";
+import { OfficerSignInPage, parseMode, SignInChooserPage, VeteranSignInPage } from "./routes/SignIn";
 import { StartPage } from "./routes/Start";
 import { TimelinePage } from "./routes/Timeline";
 
@@ -44,6 +45,19 @@ const rootRoute = createRootRoute({
 const landingRoute = createRoute({ getParentRoute: () => rootRoute, path: "/", component: LandingPage });
 const startRoute = createRoute({ getParentRoute: () => rootRoute, path: "/start", component: StartPage });
 
+// Demo sign-in screens: nothing is stored and no account is created.
+const signInRoute = createRoute({ getParentRoute: () => rootRoute, path: "/signin", component: SignInChooserPage });
+const veteranSignInRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/signin/veteran",
+  validateSearch: parseMode,
+  component: function VeteranSignIn() {
+    const { mode } = veteranSignInRoute.useSearch();
+    return <VeteranSignInPage mode={mode} />;
+  },
+});
+const officerSignInRoute = createRoute({ getParentRoute: () => rootRoute, path: "/signin/officer", component: OfficerSignInPage });
+
 const appRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: "app",
@@ -66,13 +80,16 @@ const veteranSessionRoute = createRoute({
   },
 });
 
-// Service officer side (demo: no sign-in; production requires accredited staff accounts).
+// Service officer side (demo sign-in at /signin/officer is optional; production requires accredited staff accounts).
 const repRoute = createRoute({ getParentRoute: () => rootRoute, path: "/rep", component: RepConsolePage });
 const repSessionRoute = createRoute({ getParentRoute: () => rootRoute, path: "/rep/session/$code", component: RepSessionPage });
 
 const routeTree = rootRoute.addChildren([
   landingRoute,
   startRoute,
+  signInRoute,
+  veteranSignInRoute,
+  officerSignInRoute,
   appRoute.addChildren([timelineRoute, documentsRoute, helpRoute]),
   veteranSessionRoute,
   repRoute,
