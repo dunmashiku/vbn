@@ -7,6 +7,7 @@ Browser (React SPA, localhost:5173)
   ├─ localStorage: intake answers, milestone progress, document statuses
   ├─ IndexedDB:    attached files (never leave the browser)
   └─ POST /api/chat (Vite proxy) ──> Hono on Node (localhost:8787) ──> Anthropic API (Claude)
+                                        └─ retrieve(): MiniSearch index over content/va/*.md
 ```
 
 - `packages/shared` holds the Zod schemas, types and the rule files (`milestones.ts`, `documents.ts`). Both the web app and the chat service import it, so request validation is identical on both sides.
@@ -44,9 +45,18 @@ CloudTrail (+ S3 data events), CloudWatch Logs/metrics, AWS Config
 - The in-memory rate limiter is replaced by API Gateway throttling, per-user quotas, and WAF rate-based rules.
 - The system prompt, validation limits and "no message contents in logs" rule carry over unchanged.
 
-### Retrieval over official VA content
-- A scheduled ingestion job (EventBridge Scheduler → Lambda or Step Functions) fetches allow-listed official pages (VA.gov, TRICARE.mil, Military OneSource, DoD TAP), chunks them, and stores embeddings in **Aurora PostgreSQL Serverless v2 with pgvector**, with source URL and retrieval date on every chunk.
-- The chat Lambda retrieves the top passages and passes them to the model with their URLs, so answers cite current official sources. Stale or removed pages are flagged for content review.
+### Retrieval over official VA content (RAG)
+
+**Demo (built).** `content/va/` holds 13 short notes written from official pages (VA.gov, TRICARE.mil, the Defense Department, the Veterans Crisis Line). Each has front matter with its title, source URL, retrieval date and `verify: true`. At startup the chat service splits them into about 50 passages (one per section, long sections split by paragraph) and builds an in-memory MiniSearch keyword index. For each question it retrieves up to 4 passages (at most 2 per page), sends them to the model in an `<official_sources>` block with their URLs, and streams the source list to the browser before the answer. The system prompt requires answers to come from those passages, cite them as links, and say "I'm not sure" when they don't cover the question. `pnpm eval:rag` checks retrieval against 10 sample questions.
+
+**One interface.** The chat depends only on `Retriever.retrieve(query, { k })` in `services/chat/src/rag/retriever.ts`, which returns passages with `title`, `heading`, `text`, `source`, `retrieved` and `score`. `createApp` receives the retriever, so production swaps the implementation without touching chat code:
+- **Amazon Bedrock Knowledge Bases**: official pages in S3 (or the web crawler data source), managed chunking and embeddings, queried with the `Retrieve` API; map each result's location and metadata to `source` and `retrieved`.
+- **Aurora PostgreSQL Serverless v2 with pgvector**: our own ingestion stores chunks with Bedrock embeddings (for example Amazon Titan Text Embeddings) plus source URL and retrieval date; `retrieve()` embeds the question and runs a vector search, optionally combined with keyword search for exact form numbers.
+
+**Production pipeline.**
+- A scheduled ingestion job (EventBridge Scheduler → Lambda or Step Functions) fetches allow-listed official pages (VA.gov, TRICARE.mil, Military OneSource, DoD TAP), chunks them, and stores embeddings, with source URL and retrieval date on every chunk.
+- Changed or removed pages are flagged for human content review before the new text is served. Notes marked `verify: true` stay out of production until reviewed.
+- `pnpm eval:rag` grows into a regression suite that runs in CI on every content or retrieval change.
 - Milestone and document rules move from TypeScript files to reviewed rows in Aurora with an audit history, but keep the same shape as `milestones.ts` and `documents.ts`.
 
 ### Auth

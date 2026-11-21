@@ -121,6 +121,10 @@ Walk through:
 
 Expect it to name the **service treatment records** and point to the official source. The exact wording changes each time.
 
+**Do:** ask **"When should I file for disability?"** Point to the **Sources** list under the answer.
+
+> "It doesn't answer from memory. Every answer comes from short notes we wrote from the official VA, TRICARE and Defense pages, and it links the pages it used. If those pages don't cover a question, it says it isn't sure and points you to the official source."
+
 **Optional, pick one:**
 - On the sample DD-214, click **Explain this document**. "In production this could check a real DD-214 against the person's answers. In the demo, only fake sample text is ever sent."
 - Type `My SSN is 000-00-0000` and press Enter. The message is blocked before it's sent.

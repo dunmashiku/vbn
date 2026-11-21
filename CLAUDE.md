@@ -4,7 +4,7 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 
 ## Layout
 - pnpm workspace: `apps/web` (React, Vite, TanStack Router + Query, Tailwind v4), `services/chat` (Hono + Anthropic SDK), `packages/shared` (Zod schemas, types, rules).
-- `pnpm dev` runs both apps (web on 5173, chat on 8787, `/api` proxied). `pnpm typecheck` must pass after every change.
+- `pnpm dev` runs both apps (web on 5173, chat on 8787, `/api` proxied). `pnpm typecheck` and `pnpm test` (Vitest) must pass after every change.
 - `packages/shared` exports TypeScript source directly (no build step).
 
 ## Rules and content
@@ -27,6 +27,12 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 - Demo organizations and demo cases are fictional and labeled as such; never use real organization names or branding.
 - Live sessions use `lib/liveSession.ts`: WebRTC with `BroadcastChannel` signaling, so both tabs must be in the same browser profile. The veteran makes the offer and owns the `plan` data channel. Mics start muted. Production swaps the transport for Amazon Chime SDK; keep the hook's interface stable.
 
+## Grounded answers (RAG)
+- Official-source notes live in `content/va/*.md`, one topic per file, with front matter `title`, `source` (official URL), `retrieved` (YYYY-MM-DD) and `verify: true`. Write them by reading the official page, in your own words; keep numbers, form numbers and URLs exact. If a page can't be read, say so in a `note:` field.
+- The chat depends only on `Retriever.retrieve(query, { k })` (`services/chat/src/rag/retriever.ts`), injected into `createApp`. Swap the implementation for Bedrock Knowledge Bases or pgvector; don't call MiniSearch from chat code.
+- Retrieved passages go in the `<official_sources>` system block; the browser gets a `sources` event before the text. Answers must cite those URLs and say "I'm not sure" when passages don't cover the question.
+- After changing content or retrieval, run `pnpm eval:rag` (10 questions, must stay at or above 80%) and `pnpm test`.
+
 ## Chat service
 - `services/chat/src/app.ts` is a runtime-agnostic Hono app; `server.ts` is the Node entry. Add a Lambda entry by wrapping the same app.
 - Model: `claude-opus-5-5` (override with `CHAT_MODEL`), streamed, `effort: "low"`, server-side refusal fallback enabled. The system prompt is in `systemPrompt.ts`; per-request context is a separate system block so the stable prompt can be cached.
@@ -40,4 +46,4 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 - Icons are hand-written SVG in `components/Icons.tsx`. Markdown in chat uses the small safe renderer in `components/Markdown.tsx` (no `innerHTML`).
 
 ## Dependencies
-Ask before adding any dependency. Approved: React, Vite, TanStack Router/Query, Tailwind, Hono, `@hono/node-server`, Anthropic SDK, Zod, `@fontsource/*`, tsx, and the TypeScript/Vite/Tailwind tooling already in the repo.
+Ask before adding any dependency. Approved: React, Vite, TanStack Router/Query, Tailwind, Hono, `@hono/node-server`, Anthropic SDK, Zod, MiniSearch, Vitest, `@fontsource/*`, tsx, and the TypeScript/Vite/Tailwind tooling already in the repo.

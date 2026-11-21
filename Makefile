@@ -7,7 +7,7 @@ WEB_URL      := http://localhost:5173
 CHAT_URL     := http://127.0.0.1:8787
 
 .DEFAULT_GOAL := help
-.PHONY: help setup install env check-key dev typecheck build preview health stop clean reset
+.PHONY: help setup install env check-key dev typecheck test eval-rag build preview health stop clean reset
 
 help: ## Show this help
 	@echo "Benefits Navigator - local commands"
@@ -47,6 +47,12 @@ dev: ## Start the web app and chat service (http://localhost:5173)
 
 typecheck: ## Type check all packages
 	pnpm typecheck
+
+test: ## Run all Vitest suites
+	pnpm test
+
+eval-rag: ## Check retrieval quality on 10 sample questions
+	pnpm eval:rag
 
 build: ## Production build of the web app
 	pnpm --filter @vbn/web build

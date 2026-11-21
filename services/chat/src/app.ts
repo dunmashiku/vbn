@@ -4,13 +4,14 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { stream } from "hono/streaming";
 import { rateLimit } from "./rateLimit";
-import { SYSTEM_PROMPT, contextBlock } from "./systemPrompt";
+import type { Retriever } from "./rag/retriever";
+import { SYSTEM_PROMPT, contextBlock, sourcesBlock } from "./systemPrompt";
 
 /**
  * The Hono app is runtime-agnostic: server.ts runs it on Node for local dev,
  * and a future lambda.ts can wrap the same app with `hono/aws-lambda`.
  */
-export function createApp(opts: { anthropic: Anthropic | null; model: string; clientKey?: (c: { req: { header: (n: string) => string | undefined } }) => string }) {
+export function createApp(opts: { anthropic: Anthropic | null; model: string; retriever: Retriever; clientKey?: (c: { req: { header: (n: string) => string | undefined } }) => string }) {
   const app = new Hono();
 
   // Request log without bodies: method, path, status and duration only.
@@ -20,7 +21,7 @@ export function createApp(opts: { anthropic: Anthropic | null; model: string; cl
     console.log(`${c.req.method} ${c.req.path} ${c.res.status} ${Date.now() - start}ms`);
   });
 
-  app.get("/api/health", (c) => c.json({ ok: true, configured: Boolean(opts.anthropic) }));
+  app.get("/api/health", (c) => c.json({ ok: true, configured: Boolean(opts.anthropic), passages: opts.retriever.size }));
 
   app.post(
     "/api/chat",
@@ -59,6 +60,10 @@ export function createApp(opts: { anthropic: Anthropic | null; model: string; cl
         return { role: m.role, content: m.content };
       });
 
+      // Retrieve official passages for this question (see rag/retriever.ts).
+      const passages = await opts.retriever.retrieve(retrievalQuery(messages, context.intake.separationType));
+      const sources = [...new Map(passages.map((p) => [p.source, { title: p.title, url: p.source }])).values()];
+
       c.header("Content-Type", "application/x-ndjson; charset=utf-8");
       c.header("Cache-Control", "no-store");
 
@@ -75,10 +80,12 @@ export function createApp(opts: { anthropic: Anthropic | null; model: string; cl
           system: [
             { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
             { type: "text", text: contextBlock(context) },
+            { type: "text", text: sourcesBlock(passages) },
           ],
           messages: apiMessages,
         });
         out.onAbort(() => ms.abort());
+        await send({ type: "sources", sources });
 
         try {
           for await (const event of ms) {
@@ -110,4 +117,16 @@ export function createApp(opts: { anthropic: Anthropic | null; model: string; cl
   );
 
   return app;
+}
+
+/**
+ * The search query: the latest question, plus the previous one when the latest
+ * is a short follow-up ("how long do I have?"), plus a hint for retiring vs separating.
+ */
+export function retrievalQuery(messages: { role: string; content: string }[], separationType: "retirement" | "separation"): string {
+  const userTurns = messages.filter((m) => m.role === "user").map((m) => m.content);
+  const last = userTurns[userTurns.length - 1] ?? "";
+  const prev = last.split(/\s+/).length < 7 ? (userTurns[userTurns.length - 2] ?? "") : "";
+  const hint = separationType === "retirement" ? "retiring" : "separating";
+  return [prev, last, hint].filter(Boolean).join(" ");
 }

@@ -63,7 +63,14 @@ export const ChatRequestSchema = z.object({
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 
 /** The response body is newline-delimited JSON, one event per line. */
+export interface ChatSource {
+  title: string;
+  url: string;
+}
+
 export type ChatStreamEvent =
+  /** Sent first: the official pages retrieved for this question. */
+  | { type: "sources"; sources: ChatSource[] }
   | { type: "text"; text: string }
   | { type: "error"; message: string }
   | { type: "done" };

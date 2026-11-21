@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { CHAT_LIMITS, type ChatMessage } from "@vbn/shared";
+import { CHAT_LIMITS, type ChatMessage, type ChatSource } from "@vbn/shared";
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { looksSensitive, streamChat, trimHistory } from "../lib/chatClient";
 import { toChatContext, useNavigatorData } from "../lib/useNavigator";
-import { IconAlert, IconChat, IconSend, IconSparkle, IconX } from "./Icons";
+import { IconAlert, IconChat, IconExternal, IconSend, IconSparkle, IconX } from "./Icons";
 import { Markdown } from "./Markdown";
 
 const STARTERS = [
@@ -16,6 +16,8 @@ interface UiMessage extends ChatMessage {
   id: number;
   /** Shown instead of content in the transcript (e.g. "Explain: SAMPLE DD-214"). */
   display?: string;
+  /** Official pages retrieved for this answer (assistant messages only). */
+  sources?: ChatSource[];
 }
 
 interface ChatApi {
@@ -60,6 +62,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         (chunk) =>
           setMessages((prev) => prev.map((m) => (m.id === vars.replyId ? { ...m, content: m.content + chunk } : m))),
         ac.signal,
+        (sources) => setMessages((prev) => prev.map((m) => (m.id === vars.replyId ? { ...m, sources } : m))),
       );
     },
     onError: (err, vars) => {
@@ -135,6 +138,7 @@ export function ChatPanel() {
   };
 
   const last = messages[messages.length - 1];
+  const streamingId = pending ? last?.id : undefined;
   const status = pending ? "The Navigator is replying." : last?.role === "assistant" && last.content ? "The Navigator replied." : "";
 
   return (
@@ -200,6 +204,7 @@ export function ChatPanel() {
               <div key={m.id} className="mr-4 rounded-2xl rounded-bl-sm bg-paper px-4 py-3 text-ink">
                 <span className="sr-only">Navigator said: </span>
                 {m.content ? <Markdown text={m.content} /> : <span className="text-muted">Thinking…</span>}
+                {m.content && m.id !== streamingId && <Sources sources={m.sources} answer={m.content} />}
               </div>
             ),
           )}
@@ -250,5 +255,30 @@ export function ChatPanel() {
         </form>
       </aside>
     </>
+  );
+}
+
+/**
+ * Sources under an answer: the pages the answer links to, or if it links none,
+ * the official pages that were retrieved for the question.
+ */
+function Sources({ sources, answer }: { sources?: ChatSource[]; answer: string }) {
+  if (!sources?.length) return null;
+  const cited = sources.filter((s) => answer.includes(s.url));
+  const shown = cited.length ? cited : sources;
+  return (
+    <div className="mt-3 border-t border-line pt-2">
+      <p className="text-xs font-bold uppercase tracking-wide text-muted">{cited.length ? "Sources" : "Related official sources"}</p>
+      <ul className="mt-1 space-y-1 text-sm">
+        {shown.map((s) => (
+          <li key={s.url}>
+            <a href={s.url} target="_blank" rel="noopener noreferrer" className="link inline-flex items-start gap-1">
+              <IconExternal size={14} className="mt-1 shrink-0" />
+              <span>{s.title}<span className="text-muted"> · {new URL(s.url).hostname.replace(/^www\./, "")}</span><span className="sr-only"> (opens in a new tab)</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

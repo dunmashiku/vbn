@@ -1,4 +1,4 @@
-import { CHAT_LIMITS, type ChatContext, type ChatMessage, type ChatRequest, type ChatStreamEvent } from "@vbn/shared";
+import { CHAT_LIMITS, type ChatContext, type ChatMessage, type ChatRequest, type ChatSource, type ChatStreamEvent } from "@vbn/shared";
 
 /** Social Security or account-number-like digit runs. We block these before sending. */
 const SENSITIVE = [
@@ -21,6 +21,7 @@ export async function streamChat(
   req: ChatRequest,
   onText: (chunk: string) => void,
   signal?: AbortSignal,
+  onSources?: (sources: ChatSource[]) => void,
 ): Promise<void> {
   const res = await fetch("/api/chat", {
     method: "POST",
@@ -53,6 +54,7 @@ export async function streamChat(
       if (!line) continue;
       const event = JSON.parse(line) as ChatStreamEvent;
       if (event.type === "text") onText(event.text);
+      else if (event.type === "sources") onSources?.(event.sources);
       else if (event.type === "error") throw new Error(event.message);
     }
   }

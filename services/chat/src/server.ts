@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { serve } from "@hono/node-server";
 import { createApp } from "./app";
+import { createRetriever } from "./rag/retriever";
 
 // Load services/chat/.env if present (Node's built-in loader; no dotenv needed).
 try {
@@ -18,9 +19,13 @@ if (!apiKey) {
   console.warn("ANTHROPIC_API_KEY is not set. /api/chat will return 503 until you add it to services/chat/.env.");
 }
 
+const retriever = await createRetriever();
+console.log(`Indexed ${retriever.size} passages from official-source notes in content/va.`);
+
 const app = createApp({
   anthropic: apiKey ? new Anthropic({ apiKey }) : null,
   model,
+  retriever,
 });
 
 serve({ fetch: app.fetch, port, hostname: "127.0.0.1" }, (info) => {

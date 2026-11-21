@@ -20,7 +20,7 @@ Add your key to `services/chat/.env` (`ANTHROPIC_API_KEY=...`), then:
 make dev
 ```
 
-Run `make` to list every target (`check-key`, `health`, `typecheck`, `build`, `preview`, `stop`, `clean`, `reset`).
+Run `make` to list every target (`check-key`, `health`, `typecheck`, `test`, `eval-rag`, `build`, `preview`, `stop`, `clean`, `reset`).
 
 ### Without make
 
@@ -64,7 +64,7 @@ Without an API key everything works except the chat, which shows a clear "no API
    - Moving to Maryland
 4. Click **Build my timeline**. Walk through the timeline: TAP shows as overdue (retirees should start 24 months out), BDD claim window, Survivor Benefit Plan, health coverage, VGLI and Maryland benefits. Each step has a plain-language explanation, a "Learn more" link to the official source, and the documents it needs. Check one item off to show progress saving.
 5. Go to **My documents**. Point out the "Demo only" warning, then click **Load sample documents**. Four fake documents (each marked SAMPLE) are attached and the progress bar moves. Preview the sample DD-214. Note that service treatment records are still not started, and the SSN and bank items are "have ready" reminders that are never collected.
-6. In **Ask the Navigator**, click **"Which documents am I still missing?"**. The answer is streamed and specific to this person.
+6. In **Ask the Navigator**, click **"Which documents am I still missing?"**. The answer is streamed and specific to this person. Then ask **"When should I file for disability?"**: the answer cites VA.gov, and the official pages it used are listed under **Sources** below it. Answers come from the official-source notes in `content/va/`, not the model's memory.
 7. Optional: click **Explain this document** on the sample DD-214 to show how AI could summarize a document in production (only fake sample text is ever sent).
 8. Finish with **Clear my data** to show everything is erased from the browser.
 
@@ -83,6 +83,7 @@ Two tabs only connect in the same browser profile (they talk over a `BroadcastCh
 ```
 apps/web          React + Vite + TanStack Router/Query + Tailwind (landing, intake, timeline, documents, chat UI)
 services/chat     Hono server: POST /api/chat -> Claude via the Anthropic SDK (streamed NDJSON)
+content/va        Official-source notes the chat answers from (RAG), one topic per file
 packages/shared   Zod schemas and types, plus the reviewable rule files:
                     milestones.ts  timeline milestone rules
                     documents.ts   document checklist rules
@@ -99,7 +100,21 @@ Product name, contact address and key links live in `apps/web/src/config.ts`. La
 - The chat request includes the question, recent conversation, and a summary of the intake answers, timeline and checklist statuses (no names or identifiers are collected). It never includes file contents, except the text of the built-in fake samples for "Explain this document".
 - The chat server validates requests with Zod, caps message length and history, rate limits by client, and does not log message contents.
 
+## Tests and retrieval check
+
+```bash
+pnpm test
+```
+
+```bash
+pnpm eval:rag
+```
+
+`pnpm test` runs the Vitest suites (timeline rules, chat validation and rate limit, content notes and retrieval). `pnpm eval:rag` asks 10 sample questions and reports whether retrieval finds the right official page for each.
+
 ## Before anything beyond a demo
+
+- Every note in `content/va/` is marked `verify: true`. The Survivor Benefit Plan note couldn't be checked against its official page (the Defense sites block automated reads) and needs a manual review.
 
 - Every rule in `packages/shared/milestones.ts` and `packages/shared/documents.ts` is marked `// VERIFY against va.gov before production`.
 - Stats in `apps/web/src/content/stats.ts` are marked `// VERIFY before publishing`.
