@@ -1,0 +1,13 @@
+{
+  "name": "benefits-navigator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Benefits Navigator demo prototype by Selabrook LLC",
+  "packageManager": "pnpm@10.27.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @vbn/web --filter @vbn/chat dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
