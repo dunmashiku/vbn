@@ -92,22 +92,25 @@ Click **Build my timeline**.
 
 **Screen:** My timeline.
 
-> "This is built from those seven answers. Eight steps, in the order to start them. The ones that need attention now are open; the rest are folded so it doesn't feel overwhelming."
+> "This is built from those seven answers. Eight steps, in the order to start them. The ones that need attention now are open; the rest are folded to their title and dates, so it doesn't feel overwhelming."
+
+Two cards start open: **Transition Assistance Program** (Overdue) and **GI Bill** (Due soon). The other six start closed.
 
 Walk through:
-- **Transition Assistance Program shows Overdue.** "Retirees should start about 24 months out. This person is 8 months out, so they need to act now. Seeing it now gives them time to catch up, with their transition office and a representative."
-- **GI Bill shows Due soon.** "A transfer to family has to be approved while still serving."
-- **VA disability claim (BDD):** click its title to open it. "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
-- **Survivor Benefit Plan:** only appears for retirees.
-- **Expand all** opens every step at once; **Collapse all** folds them back to titles and dates.
-- Every card has a plain-language explanation, the documents it needs, and a **Learn more** link to the official source.
+- **Transition Assistance Program, open, Overdue.** "Retirees should start about 24 months out. This person is 8 months out. Seeing it now gives them time to catch up, with their transition office and a representative."
+  - On this card, point out the plain-language explanation, **Documents for this step** (each links to My documents), and **Learn more on VA.gov**.
+- **GI Bill, open, Due soon.** "A transfer to family has to be approved while still serving."
+- **VA disability claim (BDD), closed.** Click its title to open it. "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
+- **Survivor Benefit Plan, closed:** "This one only appears for retirees." No need to open it.
+- Click **Expand all** to show everything, then **Collapse all**.
+  > "Closed, the whole plan fits on one screen: what's next, and when."
 
 Point out the line under the progress bar, **"Saved in this browser. Save to a free account to use it on any device."**
 > "Now that they've seen something useful, we offer a free account, quietly: ID.me or an email link. These are demo screens; nothing is saved."
 
 Optionally click **Save to a free account**. The sign-up page also mentions connecting a VA.gov account later for claim status. Click **Continue with ID.me**, then **Continue (demo)** to come back.
 
-**Do:** tick **Mark as done** on the open Transition Assistance Program card. The progress bar moves.
+**Do:** open the **Transition Assistance Program** card again if you collapsed it, and tick **Mark as done**. The progress bar moves, the dot turns green and the chip changes to **Done**.
 
 > "Progress is saved in this browser only."
 
@@ -256,6 +259,8 @@ People have questions at 10 p.m. that don't need a meeting. The assistant answer
 |---|---|
 | Chat says the API key is missing | Check `services/chat/.env`, restart `make dev`, and run `make health`. Meanwhile keep going; the rest of the app works without it. |
 | VA lookup gives no offices, or just links VA.gov | The VA test system may be down or the key missing. The chat falls back to the VA.gov locator on its own, so keep going: "When the VA's system doesn't answer, it sends people to VA.gov instead of guessing." Afterwards, run `make test-va-live`. |
+| A step's details or **Mark as done** aren't showing | The card is closed. Click its title, or **Expand all**. |
+| Different cards are open than the script says | Cards open based on today's date and the answers. Click **Clear my data**, then **Fill in the demo example** again. |
 | Chat is slow | Keep talking about the timeline. Replies stream in as they arrive. |
 | No internet | Everything except the chat works offline. Skip section 6 and describe it. |
 | Console says "No active shared plan has the code…" | The officer tab must be in the same Chrome window at `localhost:5173` (not `127.0.0.1`), and the data must not have been cleared since sharing. Share again and use the new code. |
