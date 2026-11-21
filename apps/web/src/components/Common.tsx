@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { COMPANY_NAME, COPYRIGHT_YEAR, DEMO_NOTICE, LINKS, PRODUCT_NAME } from "../config";
-import { STATS } from "../content/stats";
+import { COMPANY_NAME, COPYRIGHT_YEAR, CREDIT_LINE, DEMO_NOTICE, LINKS, PRODUCT_NAME } from "../config";
+import { STAT_SOURCES } from "../content/stats";
 import { IconPhone, Mark } from "./Icons";
 
 export function SkipLink() {
@@ -81,9 +81,9 @@ export function SiteFooter({ showSources = true }: { showSources?: boolean }) {
             <div>
               <h3 className="font-sans text-base font-bold">Sources</h3>
               <ol className="mt-3 list-decimal space-y-2 pl-5 text-base text-muted">
-                {STATS.map((s) => (
-                  <li key={s.id}>
-                    {s.source.name}, <a className="link" href={s.source.url}>{s.source.title}</a>
+                {STAT_SOURCES.map((src) => (
+                  <li key={src.url}>
+                    {src.name}, <a className="link" href={src.url}>{src.title}</a>
                   </li>
                 ))}
                 <li>
@@ -94,8 +94,9 @@ export function SiteFooter({ showSources = true }: { showSources?: boolean }) {
             </div>
           )}
         </div>
-        <p className="border-t border-line pt-6 text-base text-muted">
-          © {COPYRIGHT_YEAR} {COMPANY_NAME}
+        <p className="flex flex-wrap gap-x-4 gap-y-1 border-t border-line pt-6 text-base text-muted">
+          <span>{CREDIT_LINE}</span>
+          <span>© {COPYRIGHT_YEAR} {COMPANY_NAME}</span>
         </p>
       </div>
     </footer>

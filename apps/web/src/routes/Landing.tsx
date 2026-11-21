@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { CONTACT_MAILTO, LINKS, PRODUCT_NAME, COMPANY_NAME } from "../config";
+import { CLIENT_NAME, CONTACT_MAILTO, LINKS, PRODUCT_NAME, COMPANY_NAME } from "../config";
 import { STATS } from "../content/stats";
 import { PrototypeBanner, Reveal, SectionHeading, SiteFooter, SkipLink, useDocumentTitle, Wordmark } from "../components/Common";
 import {
@@ -139,8 +139,8 @@ function WhyItMatters() {
         <SectionHeading
           id="why-heading"
           eyebrow="Why it matters"
-          title="Big decisions, tight deadlines, and a lot to keep track of."
-          intro={<p>Many of the most valuable benefits depend on acting at the right time, often months before your last day in uniform.</p>}
+          title="A head start makes a big difference."
+          intro={<p>Many of the most valuable benefits depend on acting months before the last day in uniform. We help people see what's coming, so they can start early and with confidence.</p>}
         />
         <ul className="mt-12 grid gap-5 md:grid-cols-3">
           {STATS.map((s, i) => (
@@ -350,7 +350,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
     q: "What happens to my information?",
     a: <p>In this preview, your answers and any documents you add are stored only in your browser. Nothing is uploaded to us, and “Clear my data” erases it. When you ask the Navigator a question, your question and a summary of your answers and checklist are sent to generate a reply; documents are never sent, and messages aren't stored or logged.</p>,
   },
-  { q: "Who built it?", a: <p>{COMPANY_NAME}, a small team building practical tools for veterans and the organizations that serve them.</p> },
+  { q: "Who built it?", a: <p>{PRODUCT_NAME} is being developed for {CLIENT_NAME}, a veteran-led company, by {COMPANY_NAME}, a small team building practical tools for veterans and the organizations that serve them.</p> },
 ];
 
 function Faq() {

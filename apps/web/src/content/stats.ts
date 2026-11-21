@@ -1,4 +1,6 @@
 // VERIFY before publishing: confirm each figure and wording against its source.
+// Tone: we partner with government agencies and service organizations. State the
+// opportunity and how we help; never blame service members, veterans or agencies.
 
 export interface Stat {
   id: string;
@@ -8,11 +10,17 @@ export interface Stat {
   source: { name: string; title: string; url: string };
 }
 
+const GAO_TAP = {
+  name: "GAO",
+  title: "GAO-24-107083: Servicemember Transition Assistance Program",
+  url: "https://gao.gov/products/gao-24-107083",
+};
+
 export const STATS: Stat[] = [
   {
     id: "leaving",
     figure: "200,000+",
-    text: "More than 200,000 service members leave the military each year.",
+    text: "More than 200,000 service members make the move to civilian life each year.",
     source: {
       name: "DAV",
       title: "Back to civilian life: the resources transitioning veterans are owed (2024)",
@@ -20,23 +28,18 @@ export const STATS: Stat[] = [
     },
   },
   {
-    id: "class",
-    figure: "1 in 4",
-    text: "Nearly 1 in 4 service members required to attend the 2-day transition class didn't attend.",
-    source: {
-      name: "GAO",
-      title: "GAO-24-107083: Servicemember Transition Assistance Program",
-      url: "https://gao.gov/products/gao-24-107083",
-    },
+    id: "one-year",
+    figure: "1 year",
+    text: "Transition help is designed to start more than a year before leaving the military.",
+    source: GAO_TAP,
   },
   {
-    id: "planning",
+    id: "head-start",
     figure: "~70%",
-    text: "About 70% didn't start transition planning a year before separating.",
-    source: {
-      name: "GAO",
-      title: "GAO-24-107083: Servicemember Transition Assistance Program",
-      url: "https://gao.gov/products/gao-24-107083",
-    },
+    text: "About 70% started later than that. A clear plan makes an earlier start easier.",
+    source: GAO_TAP,
   },
 ];
+
+/** Each source once, in first-cited order (two stats share the GAO report). */
+export const STAT_SOURCES = STATS.map((s) => s.source).filter((src, i, all) => all.findIndex((o) => o.url === src.url) === i);

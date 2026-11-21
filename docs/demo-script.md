@@ -48,7 +48,7 @@
 
 **Screen:** landing page, top of the hero.
 
-> "More than 200,000 people leave the military every year. The benefits they've earned depend on doing things in the right order, often months before their last day. A disability claim has a window that closes 90 days before separation. Retirees make a survivor benefit decision that's hard to undo. And the GAO found about 70% didn't start planning a year out.
+> "More than 200,000 people leave the military every year. The benefits they've earned depend on doing things in the right order, often months before their last day. A disability claim has a window that closes 90 days before separation. Retirees make a survivor benefit decision that's hard to undo. Transition help is designed to start more than a year out, and most people start later than that, usually while still doing a full-time job. A clear plan makes that head start easier.
 >
 > We built Benefits Navigator to answer one question for each person: what do I need to do, by when, and with what paperwork?"
 
@@ -91,7 +91,7 @@ Click **Build my timeline**.
 > "This is built from those seven answers. Eight steps, in the order to start them."
 
 Walk through:
-- **Transition Assistance Program shows Overdue.** "Retirees should start about 24 months out. This person is 8 months out, so they need to act now. That's exactly the gap the GAO found."
+- **Transition Assistance Program shows Overdue.** "Retirees should start about 24 months out. This person is 8 months out, so they need to act now. Seeing it now gives them time to catch up, with their transition office and a representative."
 - **GI Bill shows Due soon.** "A transfer to family has to be approved while still serving."
 - **VA disability claim (BDD):** "They answered 'not sure' about a condition, so this appears. The window is 180 to 90 days before separation. Miss it and the decision comes later."
 - **Survivor Benefit Plan:** only appears for retirees.

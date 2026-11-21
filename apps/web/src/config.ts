@@ -1,9 +1,12 @@
 /** Single place for names and links that may change. */
 export const PRODUCT_NAME = "Benefits Navigator";
 export const COMPANY_NAME = "Selabrook LLC";
+/** The veteran-led company this prototype is being developed for. Agree on wording with them before sharing publicly. */
+export const CLIENT_NAME = "Freeman IBC";
+export const CREDIT_LINE = `Prepared for ${CLIENT_NAME} · Built by ${COMPANY_NAME}`;
 export const COPYRIGHT_YEAR = 2026;
 
-/** TODO: replace the placeholder address before sharing the demo outside the meeting. */
+/** TODO: placeholder. Agree with Freeman IBC whose inbox this is before sharing the demo outside the meeting. */
 export const CONTACT_EMAIL = "partners@selabrook.example";
 export const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`${PRODUCT_NAME} for our organization`)}`;
 

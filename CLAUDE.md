@@ -10,7 +10,8 @@ Demo prototype for Selabrook LLC. Optimize for clarity and a working demo, and k
 ## Rules and content
 - Timeline milestones live only in `packages/shared/milestones.ts`; documents only in `packages/shared/documents.ts`. UI code never hard-codes milestone or document facts. Each rule keeps its `// VERIFY against va.gov before production` comment.
 - "Which answers make this apply" is declarative (`appliesWhen`), not functions, so rules can move to a database unchanged.
-- Product name, contact address and links live in `apps/web/src/config.ts`. Stats live in `apps/web/src/content/stats.ts` (`// VERIFY before publishing`).
+- Product name, company and client names (`CREDIT_LINE`: "Prepared for Freeman IBC · Built by Selabrook LLC"), contact address and links live in `apps/web/src/config.ts`. Stats live in `apps/web/src/content/stats.ts` (`// VERIFY before publishing`).
+- Tone: we want to partner with government agencies and service organizations. State the opportunity and how we help; never blame service members, veterans, agencies or programs, and don't imply we know why a gap exists.
 - Prefer official sources (VA.gov, TRICARE.mil, Military OneSource, DoD TAP). Never invent URLs, deadlines or figures.
 - No VA logo, DoD seals, branch emblems or stock photos of people. Visuals are built in code.
 

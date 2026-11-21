@@ -1,6 +1,6 @@
 # Benefits Navigator (demo prototype)
 
-A free, personal timeline of military transition benefit deadlines, a document checklist, and an AI guide that knows the person's situation. Built by Selabrook LLC.
+A free, personal timeline of military transition benefit deadlines, a document checklist, and an AI guide that knows the person's situation. Prepared for Freeman IBC, built by Selabrook LLC.
 
 > Prototype for demonstration. General information only. Not affiliated with the U.S. Department of Veterans Affairs.
 
