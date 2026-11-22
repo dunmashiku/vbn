@@ -8,3 +8,7 @@ dist/
 .vite/
 coverage/
 .claude/
+
+# Private business notes (not part of the app)
+Questions_for_Edwin.pdf
+Business_Case_Due_Diligence.pdf
